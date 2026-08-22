@@ -17,14 +17,22 @@ import {
   Users,
   ShieldAlert,
   Clock,
-  Sparkles
+  Sparkles,
+  LogOut
 } from 'lucide-react';
+
+interface NavLink {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
+}
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
-  const { role, user } = useAuth();
+  const { role, user, logout } = useAuth();
 
-  const studentLinks = [
+  const studentLinks: NavLink[] = [
     { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/student/ai-tutor', label: 'AI Tutor', icon: Bot, badge: 'RAG Grounded' },
     { href: '/student/practice', label: 'Practice & Quizzes', icon: BrainCircuit },
@@ -35,7 +43,7 @@ export const Sidebar: React.FC = () => {
     { href: '/student/profile', label: 'Profile Settings', icon: User },
   ];
 
-  const teacherLinks = [
+  const teacherLinks: NavLink[] = [
     { href: '/teacher/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/teacher/availability', label: 'Availability Grid', icon: Clock },
     { href: '/teacher/bookings', label: 'Booking Requests', icon: CalendarDays },
@@ -43,14 +51,14 @@ export const Sidebar: React.FC = () => {
     { href: '/teacher/profile', label: 'Tutor Profile', icon: User },
   ];
 
-  const adminLinks = [
+  const adminLinks: NavLink[] = [
     { href: '/admin/dashboard', label: 'Overview Analytics', icon: LayoutDashboard },
     { href: '/admin/resources', label: 'Educational Resources', icon: BookOpen },
     { href: '/admin/scholarships', label: 'Scholarship Verifier', icon: Award },
     { href: '/admin/users', label: 'Manage Users', icon: Users },
   ];
 
-  const currentLinks = role === 'teacher' ? teacherLinks : role === 'admin' ? adminLinks : studentLinks;
+  const currentLinks: NavLink[] = role === 'teacher' ? teacherLinks : role === 'admin' ? adminLinks : studentLinks;
 
   return (
     <aside className="w-64 bg-slate-900/80 border-r border-slate-800 min-h-[calc(100vh-45px)] p-4 flex flex-col justify-between hidden md:flex">
@@ -94,15 +102,25 @@ export const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      <div className="p-3 glass-card rounded-2xl border border-slate-800">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xs text-white">
-            {user?.name.charAt(0) || 'U'}
+      <div className="p-3 glass-card rounded-2xl border border-slate-800 space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2.5 truncate">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xs text-white shrink-0">
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-semibold text-white truncate">{user?.name || 'User'}</p>
+              <p className="text-[10px] text-indigo-400 capitalize truncate">{user?.role || role}</p>
+            </div>
           </div>
-          <div className="truncate">
-            <p className="text-xs font-semibold text-white truncate">{user?.name || 'User'}</p>
-            <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>
-          </div>
+
+          <button
+            onClick={logout}
+            className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition-colors"
+            title="Log Out"
+          >
+            <LogOut className="w-4 h-4 text-rose-400" />
+          </button>
         </div>
       </div>
     </aside>

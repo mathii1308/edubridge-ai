@@ -9,9 +9,10 @@ interface TutorCardProps {
   tutor: Tutor;
   searchSubject?: string;
   searchTopic?: string;
+  studentRequirement?: string;
 }
 
-export const TutorCard: React.FC<TutorCardProps> = ({ tutor, searchSubject, searchTopic }) => {
+export const TutorCard: React.FC<TutorCardProps> = ({ tutor, searchSubject, searchTopic, studentRequirement }) => {
   const [showBooking, setShowBooking] = useState(false);
 
   return (
@@ -101,7 +102,9 @@ export const TutorCard: React.FC<TutorCardProps> = ({ tutor, searchSubject, sear
         tutor={tutor}
         subject={searchSubject || tutor.subjects[0] || 'Mathematics'}
         topic={searchTopic || tutor.topics[0] || 'Probability'}
+        studentRequirement={studentRequirement}
       />
     </div>
   );
 };
+

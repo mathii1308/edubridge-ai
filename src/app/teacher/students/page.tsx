@@ -3,10 +3,10 @@
 import React, { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Users, AlertTriangle, FileText, Plus } from 'lucide-react';
 
-export default function TeacherStudentsPage() {
+function TeacherStudentsContent() {
   const [students] = useState([
     {
       id: 1,
@@ -18,17 +18,16 @@ export default function TeacherStudentsPage() {
     },
     {
       id: 2,
-      name: 'Rohan Verma',
-      class: 'Class 12 STEM Science',
-      weakTopic: 'Trigonometry (55% accuracy)',
-      gapReason: 'Struggling with sine and cosine law identity proofs.',
-      lastSession: 'Aug 18, 2026'
+      name: 'Demo Student',
+      class: 'Class 12 Science',
+      weakTopic: 'DBMS Normalization (Needs Review)',
+      gapReason: 'Struggling with functional dependencies (2NF/3NF).',
+      lastSession: 'Aug 23, 2026'
     }
   ]);
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -73,5 +72,13 @@ export default function TeacherStudentsPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function TeacherStudentsPage() {
+  return (
+    <ProtectedRoute allowedRoles={['teacher']}>
+      <TeacherStudentsContent />
+    </ProtectedRoute>
   );
 }

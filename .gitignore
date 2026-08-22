@@ -1,1 +1,7 @@
 node_modules
+.next
+backend/venv
+backend/edubridge.db
+__pycache__
+*.pyc
+scratch

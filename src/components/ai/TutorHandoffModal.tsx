@@ -11,6 +11,7 @@ interface TutorHandoffModalProps {
   topic: string;
   language: string;
   learningLevel: string;
+  studentRequirement?: string;
 }
 
 export const TutorHandoffModal: React.FC<TutorHandoffModalProps> = ({
@@ -20,6 +21,7 @@ export const TutorHandoffModal: React.FC<TutorHandoffModalProps> = ({
   topic,
   language,
   learningLevel,
+  studentRequirement = "Needs 1-on-1 concept explanation"
 }) => {
   const router = useRouter();
 
@@ -29,7 +31,7 @@ export const TutorHandoffModal: React.FC<TutorHandoffModalProps> = ({
     onClose();
     // Redirect to Tutor Discovery with pre-filled state query
     router.push(
-      `/student/tutors?subject=${encodeURIComponent(subject)}&topic=${encodeURIComponent(topic)}&language=${encodeURIComponent(language)}`
+      `/student/tutors?subject=${encodeURIComponent(subject)}&topic=${encodeURIComponent(topic)}&language=${encodeURIComponent(language)}&requirement=${encodeURIComponent(studentRequirement)}`
     );
   };
 
@@ -61,6 +63,10 @@ export const TutorHandoffModal: React.FC<TutorHandoffModalProps> = ({
           <div className="flex justify-between text-slate-400">
             <span>Subject & Topic:</span>
             <span className="font-semibold text-slate-200">{subject} — {topic}</span>
+          </div>
+          <div className="flex justify-between text-slate-400">
+            <span>Student Requirement:</span>
+            <span className="font-semibold text-amber-300 truncate max-w-[200px]">{studentRequirement}</span>
           </div>
           <div className="flex justify-between text-slate-400">
             <span>Preferred Language:</span>
@@ -99,3 +105,4 @@ export const TutorHandoffModal: React.FC<TutorHandoffModalProps> = ({
     </div>
   );
 };
+

@@ -3,10 +3,10 @@
 import React, { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Award, ShieldCheck, RefreshCw, Plus, CheckCircle2 } from 'lucide-react';
 
-export default function AdminScholarshipsPage() {
+function AdminScholarshipsContent() {
   const [scholarships] = useState([
     {
       id: 1,
@@ -28,7 +28,6 @@ export default function AdminScholarshipsPage() {
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -69,5 +68,13 @@ export default function AdminScholarshipsPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function AdminScholarshipsPage() {
+  return (
+    <ProtectedRoute allowedRoles={['admin']}>
+      <AdminScholarshipsContent />
+    </ProtectedRoute>
   );
 }

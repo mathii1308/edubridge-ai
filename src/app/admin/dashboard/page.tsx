@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { useAuth } from '@/lib/auth';
 import { Shield, Users, BookOpen, Award, RefreshCw, CheckCircle2, Activity } from 'lucide-react';
 
-export default function AdminDashboard() {
+function AdminDashboardContent() {
+  const { user } = useAuth();
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
 
@@ -30,7 +32,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -47,7 +48,7 @@ export default function AdminDashboard() {
                 System Administration & Analytics 🛡️
               </h1>
               <p className="text-xs text-slate-300 mt-1 max-w-xl">
-                Monitor system metrics, verify educational resources, manage tutor credentials, and execute automated scholarship synchronization jobs.
+                Logged in as administrator <strong>{user?.email}</strong>. Monitor system metrics, verify educational resources, manage tutor credentials, and execute automated scholarship sync jobs.
               </p>
             </div>
 
@@ -103,7 +104,7 @@ export default function AdminDashboard() {
             >
               <BookOpen className="w-6 h-6 text-purple-400" />
               <h3 className="text-base font-bold text-white">Educational Resources Manager</h3>
-              <p className="text-xs text-slate-400">Add, ingest, or verify open educational textbook chunks for RAG AI retrieval.</p>
+              <p className="text-xs text-slate-400">Add, ingest, or verify open educational textbook chunks for AI retrieval.</p>
             </Link>
 
             <Link
@@ -127,5 +128,13 @@ export default function AdminDashboard() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <ProtectedRoute allowedRoles={['admin']}>
+      <AdminDashboardContent />
+    </ProtectedRoute>
   );
 }

@@ -1,23 +1,25 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { TutorCard } from '@/components/tutors/TutorCard';
 import { Tutor } from '@/types';
 import { Search, Filter, Sparkles, AlertCircle } from 'lucide-react';
 
-export default function FindTutorPage() {
+function FindTutorContent() {
   const searchParams = useSearchParams();
-  const initialSubject = searchParams.get('subject') || 'Mathematics';
-  const initialTopic = searchParams.get('topic') || 'Probability';
+  const initialSubject = searchParams.get('subject') || 'DBMS';
+  const initialTopic = searchParams.get('topic') || 'Normalization';
   const initialLanguage = searchParams.get('language') || 'English';
+  const initialRequirement = searchParams.get('requirement') || 'Needs explanation of 2NF and 3NF';
 
   const [subject, setSubject] = useState(initialSubject);
   const [topic, setTopic] = useState(initialTopic);
   const [language, setLanguage] = useState(initialLanguage);
+  const [requirement, setRequirement] = useState(initialRequirement);
   const [mode, setMode] = useState('All');
 
   const [tutors, setTutors] = useState<Tutor[]>([
@@ -30,11 +32,11 @@ export default function FindTutorPage() {
       rating: 4.9,
       teaching_mode: "Online",
       verified: true,
-      subjects: ["Mathematics"],
-      topics: ["Probability", "Trigonometry", "Calculus & Derivatives"],
+      subjects: ["Mathematics", "DBMS"],
+      topics: ["Probability", "Trigonometry", "Calculus & Derivatives", "Normalization"],
       languages: ["English", "Tamil"],
       match_score: 95.0,
-      match_reasons: ["Expert in Probability", "Fluent in Tamil", "Open Slots Today", "Top Rated 4.9★"]
+      match_reasons: ["Expert in DBMS Normalization", "Fluent in Tamil", "Open Slots Today", "Top Rated 4.9★"]
     },
     {
       id: 2,
@@ -45,11 +47,11 @@ export default function FindTutorPage() {
       rating: 4.85,
       teaching_mode: "Both",
       verified: true,
-      subjects: ["Physics", "Mathematics"],
-      topics: ["Wave Optics & Light", "Electromagnetism", "Trigonometry"],
+      subjects: ["Physics", "Mathematics", "DBMS"],
+      topics: ["Wave Optics & Light", "Electromagnetism", "Trigonometry", "Normalization"],
       languages: ["English", "Tamil"],
       match_score: 88.0,
-      match_reasons: ["Teaches Mathematics & Physics", "Bilingual Support"]
+      match_reasons: ["Teaches DBMS & Physics", "Bilingual Support"]
     },
     {
       id: 3,
@@ -86,7 +88,6 @@ export default function FindTutorPage() {
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -132,6 +133,7 @@ export default function FindTutorPage() {
                 onChange={(e) => setSubject(e.target.value)}
                 className="bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 focus:outline-none"
               >
+                <option value="DBMS">DBMS</option>
                 <option value="Mathematics">Mathematics</option>
                 <option value="Physics">Physics</option>
                 <option value="Chemistry">Chemistry</option>
@@ -159,6 +161,7 @@ export default function FindTutorPage() {
                 tutor={tutor}
                 searchSubject={subject}
                 searchTopic={topic}
+                studentRequirement={requirement}
               />
             ))}
           </div>
@@ -167,3 +170,18 @@ export default function FindTutorPage() {
     </div>
   );
 }
+
+export default function FindTutorPage() {
+  return (
+    <ProtectedRoute allowedRoles={['student']}>
+      <Suspense fallback={
+        <div className="min-h-screen bg-[#090d16] flex items-center justify-center text-slate-400 text-sm">
+          Loading Tutor Search...
+        </div>
+      }>
+        <FindTutorContent />
+      </Suspense>
+    </ProtectedRoute>
+  );
+}
+

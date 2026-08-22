@@ -3,15 +3,15 @@
 import React, { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Clock, Plus, CheckCircle2, Calendar as CalendarIcon } from 'lucide-react';
 
-export default function TeacherAvailabilityPage() {
+function TeacherAvailabilityContent() {
   const [slots, setSlots] = useState([
-    { id: 1, date: '2026-08-23', time: '10:00 - 11:00', status: 'booked', student: 'Ananya Sharma' },
+    { id: 1, date: '2026-08-23', time: '10:00 - 11:00', status: 'booked', student: 'Demo Student' },
     { id: 2, date: '2026-08-23', time: '16:00 - 17:00', status: 'available' },
     { id: 3, date: '2026-08-23', time: '17:30 - 18:30', status: 'available' },
-    { id: 4, date: '2026-08-24', time: '10:00 - 11:00', status: 'pending', student: 'Rohan Verma' },
+    { id: 4, date: '2026-08-24', time: '10:00 - 11:00', status: 'pending', student: 'Ananya Sharma' },
     { id: 5, date: '2026-08-24', time: '15:00 - 16:00', status: 'available' },
     { id: 6, date: '2026-08-25', time: '11:00 - 12:00', status: 'unavailable' },
   ]);
@@ -30,7 +30,6 @@ export default function TeacherAvailabilityPage() {
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -106,5 +105,13 @@ export default function TeacherAvailabilityPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function TeacherAvailabilityPage() {
+  return (
+    <ProtectedRoute allowedRoles={['teacher']}>
+      <TeacherAvailabilityContent />
+    </ProtectedRoute>
   );
 }

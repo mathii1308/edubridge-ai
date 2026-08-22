@@ -18,7 +18,13 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage() {
-  const { switchRole } = useAuth();
+  const { user, role } = useAuth();
+
+  const getDashboardPath = () => {
+    if (role === 'teacher') return '/teacher/dashboard';
+    if (role === 'admin') return '/admin/dashboard';
+    return '/student/dashboard';
+  };
 
   return (
     <div className="min-h-screen bg-[#090d16] text-slate-100 selection:bg-indigo-500 selection:text-white">
@@ -33,25 +39,36 @@ export default function LandingPage() {
 
         <div className="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
           <a href="#how-it-works" className="hover:text-indigo-400 transition-colors">How It Works</a>
-          <a href="#ai-tutor" className="hover:text-indigo-400 transition-colors">AI Tutor RAG</a>
+          <a href="#ai-tutor" className="hover:text-indigo-400 transition-colors">AI Tutor</a>
           <a href="#human-tutor" className="hover:text-indigo-400 transition-colors">Human Tutors</a>
           <a href="#scholarships" className="hover:text-indigo-400 transition-colors">Verified Scholarships</a>
         </div>
 
         <div className="flex items-center space-x-3 text-xs font-semibold">
-          <Link
-            href="/login"
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/student/dashboard"
-            onClick={() => switchRole('student')}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/25 transition-all"
-          >
-            Start Learning Free
-          </Link>
+          {user ? (
+            <Link
+              href={getDashboardPath()}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/25 transition-all flex items-center space-x-1.5"
+            >
+              <span>Go to Dashboard</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/register"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/25 transition-all"
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -74,30 +91,27 @@ export default function LandingPage() {
         {/* Demo Quick Launch Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
           <Link
-            href="/student/dashboard"
-            onClick={() => switchRole('student')}
+            href="/login"
             className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-bold flex items-center space-x-2 shadow-xl shadow-indigo-500/30 transition-all scale-105"
           >
-            <span>Explore Student Dashboard</span>
+            <span>Sign In to Access Platform</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
 
           <Link
-            href="/teacher/dashboard"
-            onClick={() => switchRole('teacher')}
-            className="px-6 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 text-sm font-bold flex items-center space-x-2 transition-all"
+            href="/login?demo=student"
+            className="px-6 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 text-sm font-bold flex items-center space-x-2 transition-all"
           >
-            <UserCheck className="w-4 h-4" />
-            <span>Explore Tutor View</span>
+            <UserCheck className="w-4 h-4 text-indigo-400" />
+            <span>Try Student Demo</span>
           </Link>
 
           <Link
-            href="/admin/dashboard"
-            onClick={() => switchRole('admin')}
-            className="px-6 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-sm font-bold flex items-center space-x-2 transition-all"
+            href="/login?demo=tutor"
+            className="px-6 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 text-sm font-bold flex items-center space-x-2 transition-all"
           >
-            <ShieldCheck className="w-4 h-4" />
-            <span>Explore Admin Portal</span>
+            <UserCheck className="w-4 h-4 text-emerald-400" />
+            <span>Try Tutor Demo</span>
           </Link>
         </div>
 

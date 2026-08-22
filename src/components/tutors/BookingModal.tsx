@@ -10,6 +10,7 @@ interface BookingModalProps {
   tutor: Tutor;
   subject: string;
   topic: string;
+  studentRequirement?: string;
 }
 
 export const BookingModal: React.FC<BookingModalProps> = ({
@@ -18,6 +19,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   tutor,
   subject,
   topic,
+  studentRequirement = "Needs 1-on-1 concept explanation"
 }) => {
   const [selectedDate, setSelectedDate] = useState('2026-08-23');
   const [selectedSlot, setSelectedSlot] = useState('10:00 - 11:00');
@@ -40,6 +42,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           scheduled_date: selectedDate,
           start_time: selectedSlot.split(' - ')[0],
           end_time: selectedSlot.split(' - ')[1],
+          student_requirement: studentRequirement
         }),
       });
 
@@ -82,6 +85,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </h3>
                 <p className="text-xs text-slate-400">{subject} • {topic}</p>
               </div>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs mb-4">
+              <span className="text-slate-400 block mb-0.5 font-medium">Requirement Context Passed from AI:</span>
+              <span className="text-amber-300 font-semibold">{studentRequirement}</span>
             </div>
 
             <div className="space-y-4 mb-6">
@@ -157,3 +165,4 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     </div>
   );
 };
+

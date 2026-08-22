@@ -1,18 +1,18 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import List, Optional, Any
 from datetime import datetime
 
 # Auth Schemas
 class UserRegister(BaseModel):
     name: str
-    email: EmailStr
+    email: str
     password: str
     role: str  # student, teacher, admin
     preferred_language: Optional[str] = "English"
     learning_level: Optional[str] = "Intermediate"
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class UserResponse(BaseModel):
@@ -20,6 +20,8 @@ class UserResponse(BaseModel):
     name: str
     email: str
     role: str
+    email_verified: bool = False
+    account_status: str = "active"
     created_at: datetime
     class Config:
         from_attributes = True
@@ -111,6 +113,7 @@ class BookingCreate(BaseModel):
     scheduled_date: str
     start_time: str
     end_time: str
+    student_requirement: Optional[str] = None
 
 class BookingResponse(BaseModel):
     id: int
@@ -123,8 +126,24 @@ class BookingResponse(BaseModel):
     scheduled_date: str
     start_time: str
     end_time: str
+    student_requirement: Optional[str] = None
     status: str
     created_at: datetime
+    class Config:
+        from_attributes = True
+
+class BookingMessageCreate(BaseModel):
+    message: str
+
+class BookingMessageResponse(BaseModel):
+    id: int
+    booking_id: int
+    sender_id: int
+    sender_name: Optional[str] = None
+    sender_role: str
+    message: str
+    created_at: datetime
+    read: bool
     class Config:
         from_attributes = True
 

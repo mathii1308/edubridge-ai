@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/lib/auth';
 import { Save, CheckCircle2 } from 'lucide-react';
 
-export default function TeacherProfilePage() {
+function TeacherProfileContent() {
   const { user } = useAuth();
   const [saved, setSaved] = useState(false);
 
@@ -28,7 +28,6 @@ export default function TeacherProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -127,5 +126,13 @@ export default function TeacherProfilePage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function TeacherProfilePage() {
+  return (
+    <ProtectedRoute allowedRoles={['teacher']}>
+      <TeacherProfileContent />
+    </ProtectedRoute>
   );
 }

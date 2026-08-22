@@ -4,16 +4,15 @@ import React from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/lib/auth';
 import { Calendar, Users, Clock, AlertTriangle, CheckCircle2, Video, ArrowRight } from 'lucide-react';
 
-export default function TeacherDashboard() {
+function TeacherDashboardContent() {
   const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -27,10 +26,10 @@ export default function TeacherDashboard() {
                 Verified Educator Portal
               </span>
               <h1 className="text-2xl font-extrabold text-white mt-2">
-                Welcome back, {user?.name || 'Dr. Rajesh Kumar'} 🎓
+                Welcome back, {user?.name || 'Educator'} 🎓
               </h1>
               <p className="text-xs text-slate-300 mt-1 max-w-xl">
-                You have <strong>1 upcoming session today</strong> and <strong>1 pending booking request</strong>. AI struggle detection flagged 2 students needing probability review.
+                Logged in as <strong>{user?.email}</strong>. Manage your availability slots, booking requests, and student session notes.
               </p>
             </div>
 
@@ -46,27 +45,27 @@ export default function TeacherDashboard() {
           {/* Quick Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="glass-card rounded-2xl p-5 border border-slate-800 space-y-1">
-              <span className="text-[10px] uppercase font-bold text-slate-400">Today's Sessions</span>
+              <span className="text-[10px] uppercase font-bold text-slate-400">Scheduled Sessions</span>
               <p className="text-2xl font-extrabold text-white">1</p>
               <span className="text-[11px] text-emerald-400 font-medium">10:00 AM Session</span>
             </div>
 
             <div className="glass-card rounded-2xl p-5 border border-slate-800 space-y-1">
-              <span className="text-[10px] uppercase font-bold text-slate-400">Pending Booking Requests</span>
+              <span className="text-[10px] uppercase font-bold text-slate-400">Pending Requests</span>
               <p className="text-2xl font-extrabold text-amber-400">1</p>
-              <span className="text-[11px] text-amber-300">Requires Confirmation</span>
+              <span className="text-[11px] text-amber-300">Requires Action</span>
             </div>
 
             <div className="glass-card rounded-2xl p-5 border border-slate-800 space-y-1">
               <span className="text-[10px] uppercase font-bold text-slate-400">Current Rating</span>
               <p className="text-2xl font-extrabold text-amber-400">4.9 ★</p>
-              <span className="text-[11px] text-slate-400">From 48 Completed Sessions</span>
+              <span className="text-[11px] text-slate-400">Verified Educator</span>
             </div>
 
             <div className="glass-card rounded-2xl p-5 border border-slate-800 space-y-1">
-              <span className="text-[10px] uppercase font-bold text-slate-400">Assigned Students</span>
+              <span className="text-[10px] uppercase font-bold text-slate-400">Active Students</span>
               <p className="text-2xl font-extrabold text-indigo-400">12</p>
-              <span className="text-[11px] text-slate-400">Mathematics & Physics</span>
+              <span className="text-[11px] text-slate-400">Mathematics & DBMS</span>
             </div>
           </div>
 
@@ -88,11 +87,11 @@ export default function TeacherDashboard() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-2xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-300">
-                      A
+                      S
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-white">Ananya Sharma</h4>
-                      <p className="text-xs text-indigo-300">Mathematics • Probability & Bayes Theorem</p>
+                      <h4 className="text-sm font-bold text-white">Demo Student</h4>
+                      <p className="text-xs text-indigo-300">DBMS • Normalization (2NF & 3NF)</p>
                     </div>
                   </div>
                   <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
@@ -102,14 +101,17 @@ export default function TeacherDashboard() {
 
                 <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-xs">
                   <span className="text-slate-400">📅 Aug 23, 2026 • ⏰ 10:00 AM - 11:00 AM</span>
-                  <button className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1">
-                    <Video className="w-3.5 h-3.5" /> Start Classroom
-                  </button>
+                  <Link
+                    href="/teacher/bookings"
+                    className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1"
+                  >
+                    <Video className="w-3.5 h-3.5" /> Classroom Session
+                  </Link>
                 </div>
               </div>
             </div>
 
-            {/* Students Needing Attention (Learning Gap Insights) */}
+            {/* Students Needing Attention */}
             <div className="glass-card rounded-3xl p-6 border border-amber-500/20 bg-amber-500/5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -123,20 +125,7 @@ export default function TeacherDashboard() {
                 <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
                   <div>
                     <h4 className="text-sm font-bold text-white">Ananya Sharma</h4>
-                    <p className="text-xs text-rose-400 font-medium mt-0.5">⚠️ Probability accuracy dropped to 42%</p>
-                  </div>
-                  <Link
-                    href="/teacher/students"
-                    className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 text-xs font-medium"
-                  >
-                    View Notes
-                  </Link>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
-                  <div>
-                    <h4 className="text-sm font-bold text-white">Rohan Verma</h4>
-                    <p className="text-xs text-amber-400 font-medium mt-0.5">⚠️ Trigonometry identities struggle</p>
+                    <p className="text-xs text-rose-400 font-medium mt-0.5">⚠️ DBMS Normalization gap flagged</p>
                   </div>
                   <Link
                     href="/teacher/students"
@@ -151,5 +140,13 @@ export default function TeacherDashboard() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function TeacherDashboard() {
+  return (
+    <ProtectedRoute allowedRoles={['teacher']}>
+      <TeacherDashboardContent />
+    </ProtectedRoute>
   );
 }

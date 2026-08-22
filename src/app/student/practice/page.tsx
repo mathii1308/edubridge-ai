@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { QuizCard } from '@/components/practice/QuizCard';
 import { BrainCircuit, BookOpen, Sparkles } from 'lucide-react';
 
-export default function PracticePage() {
+function PracticeContent() {
   const [selectedSubject, setSelectedSubject] = useState('Mathematics');
   const [selectedTopic, setSelectedTopic] = useState('Probability');
 
@@ -34,7 +34,6 @@ export default function PracticePage() {
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -60,6 +59,7 @@ export default function PracticePage() {
                 <option value="Mathematics">Mathematics</option>
                 <option value="Physics">Physics</option>
                 <option value="Chemistry">Chemistry</option>
+                <option value="DBMS">DBMS</option>
               </select>
 
               <select
@@ -67,9 +67,10 @@ export default function PracticePage() {
                 onChange={(e) => setSelectedTopic(e.target.value)}
                 className="bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 focus:outline-none"
               >
-                <option value="Probability">Probability (Weak — 42%)</option>
-                <option value="Trigonometry">Trigonometry (Developing — 55%)</option>
-                <option value="Calculus & Derivatives">Calculus (Good — 78%)</option>
+                <option value="Probability">Probability</option>
+                <option value="Trigonometry">Trigonometry</option>
+                <option value="Calculus & Derivatives">Calculus</option>
+                <option value="Normalization">DBMS Normalization</option>
               </select>
             </div>
           </div>
@@ -83,5 +84,13 @@ export default function PracticePage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function PracticePage() {
+  return (
+    <ProtectedRoute allowedRoles={['student']}>
+      <PracticeContent />
+    </ProtectedRoute>
   );
 }

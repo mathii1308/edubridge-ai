@@ -3,13 +3,12 @@
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ChatInterface } from '@/components/ai/ChatInterface';
 
-export default function AITutorPage() {
+function AITutorContent() {
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -20,5 +19,13 @@ export default function AITutorPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function AITutorPage() {
+  return (
+    <ProtectedRoute allowedRoles={['student']}>
+      <AITutorContent />
+    </ProtectedRoute>
   );
 }

@@ -6,6 +6,10 @@ from app.services.ai_service import AIService
 
 router = APIRouter(prefix="/ai", tags=["AI Tutor"])
 
+@router.post("/analyze-requirement")
+def analyze_student_requirement(req: AIChatRequest):
+    return AIService.analyze_requirement(req.message)
+
 @router.post("/chat", response_model=AIChatResponse)
 def chat_with_ai(req: AIChatRequest, db: Session = Depends(get_db)):
     response = AIService.generate_tutor_response(
@@ -34,3 +38,4 @@ def generate_practice_question(subject: str = "Mathematics", topic: str = "Proba
         "subject": subject,
         "topic": topic
     }
+

@@ -25,6 +25,55 @@ Never claim scholarship eligibility unless verified scholarship rules support th
 
 class AIService:
     @staticmethod
+    def analyze_requirement(message: str) -> Dict:
+        """
+        Analyzes a student's question/doubt to infer:
+        - Subject (e.g. DBMS, Mathematics, Physics, Chemistry)
+        - Topic (e.g. Normalization, Probability, Wave Optics)
+        - Difficulty / Specific requirement (e.g. 2NF / 3NF, Bayes Theorem)
+        - Type of help needed
+        """
+        msg_lower = message.lower()
+        
+        subject = "Mathematics"
+        topic = "Probability"
+        difficulty = "Medium"
+        requirement = "Concept explanation and step-by-step guidance"
+
+        if "dbms" in msg_lower or "database" in msg_lower or "normaliz" in msg_lower or "2nf" in msg_lower or "3nf" in msg_lower or "bcnf" in msg_lower or "sql" in msg_lower:
+            subject = "DBMS"
+            topic = "Normalization"
+            if "2nf" in msg_lower or "3nf" in msg_lower:
+                difficulty = "2NF / 3NF Functional Dependencies"
+                requirement = "Needs clear explanation of 2NF (partial dependency) and 3NF (transitive dependency)"
+            else:
+                difficulty = "Normal Forms & Functional Dependency"
+                requirement = "Concept breakdown of database normalization"
+        elif "physics" in msg_lower or "optics" in msg_lower or "wave" in msg_lower or "light" in msg_lower or "lens" in msg_lower:
+            subject = "Physics"
+            topic = "Wave Optics & Light"
+            difficulty = "Interference & Wavefronts"
+            requirement = "Derivation & Huygens principle explanation"
+        elif "chemistry" in msg_lower or "organic" in msg_lower or "thermodynamics" in msg_lower or "reaction" in msg_lower:
+            subject = "Chemistry"
+            topic = "Organic Reaction Mechanisms"
+            difficulty = "Electrophilic Addition & Mechanisms"
+            requirement = "Step-by-step reaction mechanism breakdown"
+        elif "probability" in msg_lower or "bayes" in msg_lower or "conditional" in msg_lower or "நிகழ்தகவு" in msg_lower:
+            subject = "Mathematics"
+            topic = "Probability"
+            difficulty = "Conditional Probability P(A|B)"
+            requirement = "Formula application and real-world examples"
+
+        return {
+            "subject": subject,
+            "topic": topic,
+            "difficulty": difficulty,
+            "student_requirement": requirement,
+            "type_of_help": "Human tutoring if AI assistance is insufficient"
+        }
+
+    @staticmethod
     def generate_tutor_response(
         db: Session,
         message: str,
@@ -36,25 +85,14 @@ class AIService:
     ) -> Dict:
         """
         Generates grounded, step-by-step AI Tutor responses with citations and understanding checks.
-        Handles English & Tamil queries.
+        Handles English & Tamil queries and automatic requirement analysis.
         """
-        # Step 1: Topic & Subject Detection
         msg_lower = message.lower()
-        detected_subject = subject or "Mathematics"
-        if "physics" in msg_lower or "optics" in msg_lower or "wave" in msg_lower or "light" in msg_lower:
-            detected_subject = "Physics"
-        elif "chemistry" in msg_lower or "organic" in msg_lower or "thermodynamics" in msg_lower:
-            detected_subject = "Chemistry"
+        analysis = AIService.analyze_requirement(message)
 
-        detected_topic = topic or "Probability"
-        if "probability" in msg_lower or "conditional" in msg_lower or "bayes" in msg_lower or "நிகழ்தகவு" in msg_lower:
-            detected_topic = "Probability"
-        elif "trigonometry" in msg_lower or "sine" in msg_lower or "cosine" in msg_lower:
-            detected_topic = "Trigonometry"
-        elif "optics" in msg_lower or "wave" in msg_lower:
-            detected_topic = "Wave Optics & Light"
-        elif "organic" in msg_lower:
-            detected_topic = "Organic Reaction Mechanisms"
+        detected_subject = subject or analysis["subject"]
+        detected_topic = topic or analysis["topic"]
+        difficulty = analysis["difficulty"]
 
         # Step 2: Retrieve Grounded Context via RAG
         rag_chunks = RAGService.retrieve_context(db, query=message, language=language, subject=detected_subject)
@@ -73,26 +111,33 @@ class AIService:
         # Step 3: Action-Specific Logic & Multilingual Output Generation
         needs_tutor = False
         learning_gap = None
-        difficulty = "Medium"
 
         if action_type == "struggle" or "still don't understand" in msg_lower or "புரிந்துகொள்ளவில்லை" in msg_lower:
             needs_tutor = True
-            learning_gap = f"Persistent struggle applying core principles of {detected_topic}."
+            learning_gap = f"Persistent struggle applying core principles of {detected_topic} ({difficulty})."
             if language == "Tamil":
                 reply = (
-                    f"**மன்னிக்கவும், இந்த கருத்து உங்களுக்கு இன்னும் சவாலாக உள்ளது போல் தெரிகிறது.**\n\n"
+                    f"**மன்னிக்கவும், இந்த கருத்து ({detected_topic}) உங்களுக்கு இன்னும் சவாலாக உள்ளது போல் தெரிகிறது.**\n\n"
                     f"நாங்கள் மீண்டும் வேறு வழியில் விளக்க முயன்றோம். ஆனால் ஆழமான புரிதலுக்கு ஒரு தனிப்பட்ட மனித ஆசிரியர் (Human Tutor) உங்களுக்கு உடனடியாக உதவ முடியும்.\n\n"
-                    f"**நாங்கள் கண்டறிந்த பகுதி:** {detected_topic} ({detected_subject})\n"
+                    f"**நாங்கள் கண்டறிந்த பகுதி:** {detected_topic} — {difficulty} ({detected_subject})\n"
                     f"நேரலை ஆசிரியருடன் இணைந்து பாடத்தை எளிதாக கற்க விரும்புகிறீர்களா?"
                 )
             else:
                 reply = (
                     f"**I understand this concept is still tricky!** Don't worry, learning takes time.\n\n"
-                    f"Since this is a core topic in **{detected_topic} ({detected_subject})**, connecting with a dedicated human tutor can provide real-time step-by-step guidance tailored to your pace.\n\n"
+                    f"Since this is a core topic in **{detected_topic} ({detected_subject})** — specifically *{difficulty}*, connecting with a dedicated human tutor can provide real-time step-by-step guidance tailored to your pace.\n\n"
                     f"Would you like me to match you with an available tutor right now?"
                 )
         elif action_type == "simplify":
-            if language == "Tamil":
+            if detected_subject == "DBMS":
+                reply = (
+                    f"**Let's simplify DBMS Normalization (2NF & 3NF):**\n\n"
+                    f"• **1NF:** Remove repeated lists so every cell has a single value.\n"
+                    f"• **2NF:** Remove partial dependency (Every non-key attribute must depend on the FULL primary key, not just part of it).\n"
+                    f"• **3NF:** Remove transitive dependency (No non-key attribute should depend on another non-key attribute, i.e., A → B and B → C).\n\n"
+                    f"**Simple Analogy:** In 3NF, every piece of info must depend on 'the key, the whole key, and nothing but the key'."
+                )
+            elif language == "Tamil":
                 reply = (
                     f"**எளிய முறையில் விளக்கம் ({detected_topic}):**\n\n"
                     f"சார்பு நிகழ்தகவு என்பதை ஒரு நிபந்தனை என நினைக்கலாம். உதாரணமாக, மழை பெய்யும்போது குடை கொண்டு செல்வது.\n\n"
@@ -111,7 +156,16 @@ class AIService:
                     f"**Real-world Analogy:** What is the probability that a student wears glasses, given that they are in the Science stream?"
                 )
         elif action_type == "example":
-            if language == "Tamil":
+            if detected_subject == "DBMS":
+                reply = (
+                    f"**Real-World DBMS Normalization Example:**\n\n"
+                    f"Suppose we have a Student-Course table:\n"
+                    f"`(StudentID, CourseID, StudentName, LecturerID, LecturerPhone)`\n\n"
+                    f"• **2NF Issue:** `StudentName` depends only on `StudentID`, not `CourseID`. Solution: Split into `Students` table and `Enrollments` table.\n"
+                    f"• **3NF Issue:** `LecturerPhone` depends on `LecturerID`, which is NOT a primary key in `Enrollments`. Solution: Separate `Lecturers(LecturerID, LecturerPhone)` table!\n\n"
+                    f"Does this example make 2NF vs 3NF clear?"
+                )
+            elif language == "Tamil":
                 reply = (
                     f"**நடைமுறை உதாரணம் ({detected_topic}):**\n\n"
                     f"ஒரு பையில் 4 சிவப்பு பந்துகளும் 6 நீல பந்துகளும் உள்ளன. நீங்கள் முதல் பந்தை எடுக்கும்போது சிவப்பு பந்து கிடைக்க நிகழ்தகவு 4/10 ஆகும்.\n\n"
@@ -126,7 +180,16 @@ class AIService:
                     f"Notice how the second probability changed because of what happened first! That's conditional probability in action."
                 )
         else:
-            if language == "Tamil":
+            if detected_subject == "DBMS":
+                reply = (
+                    f"**EduBridge AI Step-by-Step Guide: DBMS Normalization ({difficulty})**\n\n"
+                    f"Normalization is the process of organizing database tables to reduce redundancy and improve data integrity.\n\n"
+                    f"**1. First Normal Form (1NF):** Ensure atomic values in every column and unique column names.\n"
+                    f"**2. Second Normal Form (2NF):** Must be in 1NF AND eliminate partial dependencies (where non-prime attributes depend on part of composite key).\n"
+                    f"**3. Third Normal Form (3NF):** Must be in 2NF AND eliminate transitive dependencies (X → Y and Y → Z).\n\n"
+                    f"Which specific part (1NF, 2NF, or 3NF) would you like to explore or practice?"
+                )
+            elif language == "Tamil":
                 reply = (
                     f"**EduBridge AI கற்றல் வழிகாட்டி ({detected_subject} - {detected_topic}):**\n\n"
                     f"உங்கள் கேள்விக்கான grounded கல்வி மூல விளக்கம்:\n\n"
@@ -153,7 +216,8 @@ class AIService:
             "topic": detected_topic,
             "difficulty": difficulty,
             "learning_gap": learning_gap,
-            "confidence": 0.92,
+            "confidence": 0.94,
             "needs_tutor": needs_tutor,
             "citations": citations
         }
+

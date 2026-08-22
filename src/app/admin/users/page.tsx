@@ -3,20 +3,21 @@
 import React, { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Users, ShieldCheck, UserCheck, GraduationCap } from 'lucide-react';
 
-export default function AdminUsersPage() {
+function AdminUsersContent() {
   const [users] = useState([
     { id: 1, name: 'Ananya Sharma', email: 'student@edubridge.ai', role: 'student', status: 'Active' },
-    { id: 2, name: 'Dr. Rajesh Kumar', email: 'tutor.rajesh@edubridge.ai', role: 'teacher', status: 'Verified Tutor' },
-    { id: 3, name: 'Prof. Lakshmi Priya', email: 'tutor.lakshmi@edubridge.ai', role: 'teacher', status: 'Verified Tutor' },
-    { id: 4, name: 'EduBridge Admin', email: 'admin@edubridge.ai', role: 'admin', status: 'Super Admin' }
+    { id: 2, name: 'Demo Student', email: 'student.demo@edubridge.local', role: 'student', status: 'Active' },
+    { id: 3, name: 'Dr. Rajesh Kumar', email: 'tutor.rajesh@edubridge.ai', role: 'teacher', status: 'Verified Tutor' },
+    { id: 4, name: 'Demo Tutor (Dr. Rajesh)', email: 'tutor.demo@edubridge.local', role: 'teacher', status: 'Verified Tutor' },
+    { id: 5, name: 'EduBridge Admin', email: 'admin@edubridge.ai', role: 'admin', status: 'Super Admin' },
+    { id: 6, name: 'Demo Admin', email: 'admin.demo@edubridge.local', role: 'admin', status: 'Super Admin' }
   ]);
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -57,5 +58,13 @@ export default function AdminUsersPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function AdminUsersPage() {
+  return (
+    <ProtectedRoute allowedRoles={['admin']}>
+      <AdminUsersContent />
+    </ProtectedRoute>
   );
 }

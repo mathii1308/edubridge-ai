@@ -5,7 +5,9 @@ export interface User {
   name: string;
   email: string;
   role: Role;
-  created_at: string;
+  email_verified?: boolean;
+  account_status?: string;
+  created_at?: string;
 }
 
 export interface StudentProfile {
@@ -77,8 +79,20 @@ export interface Booking {
   scheduled_date: string;
   start_time: string;
   end_time: string;
+  student_requirement?: string;
   status: 'requested' | 'accepted' | 'rejected' | 'cancelled' | 'completed';
   created_at: string;
+}
+
+export interface BookingMessage {
+  id: number;
+  booking_id: number;
+  sender_id: number;
+  sender_name?: string;
+  sender_role: 'student' | 'teacher';
+  message: string;
+  created_at: string;
+  read: boolean;
 }
 
 export interface QuizQuestion {

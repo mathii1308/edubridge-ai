@@ -3,23 +3,23 @@
 import React, { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/lib/auth';
 import { User, Save, CheckCircle2 } from 'lucide-react';
 
-export default function StudentProfilePage() {
+function StudentProfileContent() {
   const { user } = useAuth();
   const [saved, setSaved] = useState(false);
 
   const [form, setForm] = useState({
-    name: user?.name || "Ananya Sharma",
-    email: user?.email || "student@edubridge.ai",
+    name: user?.name || "Student",
+    email: user?.email || "",
     educationLevel: "High School",
-    institution: "Government Higher Secondary School, Chennai",
+    institution: "Chennai High School",
     preferredLanguage: "English",
     learningLevel: "Intermediate",
     state: "Tamil Nadu",
-    course: "Class 12 Higher Secondary Science",
+    course: "Class 12 Science",
     academicScore: 84.5,
     incomeRange: 180000
   });
@@ -52,7 +52,6 @@ export default function StudentProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -174,5 +173,13 @@ export default function StudentProfilePage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function StudentProfilePage() {
+  return (
+    <ProtectedRoute allowedRoles={['student']}>
+      <StudentProfileContent />
+    </ProtectedRoute>
   );
 }

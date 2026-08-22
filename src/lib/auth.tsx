@@ -5,70 +5,75 @@ import { User, Role } from '@/types';
 
 interface AuthContextType {
   user: User | null;
-  role: Role;
-  login: (email: string, role?: Role) => void;
+  token: string | null;
+  role: Role | null;
+  isLoading: boolean;
+  login: (userData: User, tokenStr: string) => void;
   logout: () => void;
-  switchRole: (newRole: Role) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  role: 'student',
+  token: null,
+  role: null,
+  isLoading: true,
   login: () => {},
   logout: () => {},
-  switchRole: () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [role, setRole] = useState<Role>('student');
-  const [user, setUser] = useState<User | null>({
-    id: 1,
-    name: "Ananya Sharma",
-    email: "student@edubridge.ai",
-    role: "student",
-    created_at: new Date().toISOString()
-  });
+  const [token, setToken] = useState<string | null>(null);
+  const [role, setRole] = useState<Role | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const switchRole = (newRole: Role) => {
-    setRole(newRole);
-    if (newRole === 'student') {
-      setUser({
-        id: 1,
-        name: "Ananya Sharma",
-        email: "student@edubridge.ai",
-        role: "student",
-        created_at: new Date().toISOString()
-      });
-    } else if (newRole === 'teacher') {
-      setUser({
-        id: 2,
-        name: "Dr. Rajesh Kumar",
-        email: "tutor.rajesh@edubridge.ai",
-        role: "teacher",
-        created_at: new Date().toISOString()
-      });
-    } else {
-      setUser({
-        id: 5,
-        name: "EduBridge Admin",
-        email: "admin@edubridge.ai",
-        role: "admin",
-        created_at: new Date().toISOString()
-      });
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem('edubridge_user');
+      const storedToken = localStorage.getItem('edubridge_token');
+
+      if (storedUser && storedToken) {
+        const parsed: User = JSON.parse(storedUser);
+        if (parsed && parsed.id && parsed.email && parsed.role) {
+          setUser(parsed);
+          setRole(parsed.role as Role);
+          setToken(storedToken);
+        } else {
+          // Clean invalid state
+          localStorage.removeItem('edubridge_user');
+          localStorage.removeItem('edubridge_token');
+        }
+      }
+    } catch (e) {
+      console.warn("Could not load stored user session:", e);
+      localStorage.removeItem('edubridge_user');
+      localStorage.removeItem('edubridge_token');
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, []);
 
-  const login = (email: string, overrideRole?: Role) => {
-    const r = overrideRole || (email.includes('tutor') || email.includes('teacher') ? 'teacher' : email.includes('admin') ? 'admin' : 'student');
-    switchRole(r);
+  const login = (userData: User, tokenStr: string) => {
+    setUser(userData);
+    setToken(tokenStr);
+    setRole(userData.role as Role);
+    localStorage.setItem('edubridge_user', JSON.stringify(userData));
+    localStorage.setItem('edubridge_token', tokenStr);
   };
 
   const logout = () => {
     setUser(null);
+    setToken(null);
+    setRole(null);
+    localStorage.removeItem('edubridge_user');
+    localStorage.removeItem('edubridge_token');
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, login, logout, switchRole }}>
+    <AuthContext.Provider value={{ user, token, role, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

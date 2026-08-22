@@ -1,11 +1,12 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/lib/auth';
+import { Booking } from '@/types';
 import {
   TrendingUp,
   AlertTriangle,
@@ -19,12 +20,34 @@ import {
   BookOpen
 } from 'lucide-react';
 
-export default function StudentDashboard() {
+function StudentDashboardContent() {
   const { user } = useAuth();
+  const [upcomingBooking, setUpcomingBooking] = useState<Booking | null>(null);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(true);
+
+  useEffect(() => {
+    if (user?.id) {
+      const fetchBookings = async () => {
+        try {
+          setIsLoadingBookings(true);
+          const res = await fetch(`http://localhost:8000/bookings?user_role=student&user_id=${user.id}`);
+          if (res.ok) {
+            const data: Booking[] = await res.json();
+            const active = data.find(b => b.status === 'accepted' || b.status === 'requested');
+            setUpcomingBooking(active || null);
+          }
+        } catch {
+          setUpcomingBooking(null);
+        } finally {
+          setIsLoadingBookings(false);
+        }
+      };
+      fetchBookings();
+    }
+  }, [user?.id]);
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -35,13 +58,13 @@ export default function StudentDashboard() {
           <div className="glass-card rounded-3xl p-6 border border-indigo-500/20 bg-gradient-to-r from-indigo-900/40 via-purple-900/20 to-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <span className="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                Class 12 STEM Science • Tamil Nadu
+                Student Learning Portal
               </span>
               <h1 className="text-2xl font-extrabold text-white mt-2">
-                Welcome back, {user?.name || 'Ananya'} 👋
+                Welcome back, {user?.name || 'Student'} 👋
               </h1>
               <p className="text-xs text-slate-300 mt-1 max-w-xl">
-                AI support is ready. Your current overall mastery is <strong>76.0%</strong>. Review your weak topics or get matched with verified scholarships.
+                AI tutoring and human support are active for your account (<strong>{user?.email}</strong>).
               </p>
             </div>
 
@@ -56,9 +79,9 @@ export default function StudentDashboard() {
             </div>
           </div>
 
-          {/* Grid Layout: Progress + Weak Topics */}
+          {/* Grid Layout: Progress + Upcoming Session */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Subject Mastery Progress Bars */}
+            {/* Subject Mastery Performance */}
             <div className="lg:col-span-2 glass-card rounded-3xl p-6 border border-slate-800 space-y-5">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -66,14 +89,14 @@ export default function StudentDashboard() {
                   Subject Mastery Performance
                 </h3>
                 <Link href="/student/progress" className="text-xs text-indigo-400 hover:underline">
-                  View Analytics →
+                  View Detailed Analytics →
                 </Link>
               </div>
 
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className="text-slate-300">Mathematics</span>
+                    <span className="text-slate-300">Mathematics & Probability</span>
                     <span className="text-indigo-400">78%</span>
                   </div>
                   <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
@@ -83,21 +106,21 @@ export default function StudentDashboard() {
 
                 <div>
                   <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className="text-slate-300">Physics</span>
-                    <span className="text-emerald-400">85%</span>
+                    <span className="text-slate-300">DBMS & Normalization</span>
+                    <span className="text-emerald-400">65%</span>
                   </div>
                   <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: '85%' }}></div>
+                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: '65%' }}></div>
                   </div>
                 </div>
 
                 <div>
                   <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className="text-slate-300">Chemistry</span>
-                    <span className="text-amber-400">65%</span>
+                    <span className="text-slate-300">Physics & Wave Optics</span>
+                    <span className="text-amber-400">82%</span>
                   </div>
                   <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-amber-500 rounded-full" style={{ width: '65%' }}></div>
+                    <div className="h-full bg-amber-500 rounded-full" style={{ width: '82%' }}></div>
                   </div>
                 </div>
               </div>
@@ -108,32 +131,43 @@ export default function StudentDashboard() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Upcoming Session</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold">
-                    Confirmed
-                  </span>
+                  {upcomingBooking && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold uppercase">
+                      {upcomingBooking.status}
+                    </span>
+                  )}
                 </div>
 
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-10 h-10 rounded-2xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-300">
-                    R
-                  </div>
+                {upcomingBooking ? (
                   <div>
-                    <h4 className="text-sm font-bold text-white">Dr. Rajesh Kumar</h4>
-                    <p className="text-xs text-slate-400">Mathematics • Probability</p>
-                  </div>
-                </div>
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-10 h-10 rounded-2xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-300">
+                        {upcomingBooking.teacher_name ? upcomingBooking.teacher_name.charAt(0) : 'T'}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-white">{upcomingBooking.teacher_name || 'Assigned Tutor'}</h4>
+                        <p className="text-xs text-indigo-300">{upcomingBooking.subject_name} • {upcomingBooking.topic_name}</p>
+                      </div>
+                    </div>
 
-                <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs space-y-1">
-                  <p className="text-slate-300">📅 Tomorrow, Aug 23, 2026</p>
-                  <p className="text-indigo-400 font-medium">⏰ 10:00 AM - 11:00 AM</p>
-                </div>
+                    <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs space-y-1">
+                      <p className="text-slate-300">📅 Date: {upcomingBooking.scheduled_date}</p>
+                      <p className="text-indigo-400 font-medium">⏰ Time: {upcomingBooking.start_time} - {upcomingBooking.end_time}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-6 text-center text-slate-400 space-y-2">
+                    <CalendarDays className="w-8 h-8 mx-auto text-slate-600" />
+                    <p className="text-xs">No upcoming tutor sessions booked yet.</p>
+                  </div>
+                )}
               </div>
 
               <Link
                 href="/student/sessions"
                 className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold text-center block transition-all"
               >
-                View All Sessions
+                {upcomingBooking ? 'View All Sessions' : 'Book a Session'}
               </Link>
             </div>
           </div>
@@ -145,39 +179,33 @@ export default function StudentDashboard() {
                 <AlertTriangle className="w-5 h-5 text-amber-400" />
                 <h3 className="text-sm font-bold text-white">Identified Weak Topics (Requires Action)</h3>
               </div>
-              <span className="text-[10px] text-amber-300 font-semibold">Accuracy &lt; 60%</span>
+              <span className="text-[10px] text-amber-300 font-semibold">AI Identified Gaps</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="text-sm font-bold text-white">Probability</h4>
-                    <p className="text-xs text-slate-400">Mathematics</p>
+                    <h4 className="text-sm font-bold text-white">DBMS Normalization (2NF & 3NF)</h4>
+                    <p className="text-xs text-slate-400">Database Management Systems</p>
                   </div>
                   <span className="text-xs font-extrabold text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/30">
-                    42% Score
+                    Needs Attention
                   </span>
                 </div>
 
                 <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-800">
                   <Link
-                    href="/student/practice"
+                    href="/student/ai-tutor?subject=DBMS&topic=Normalization"
                     className="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-500 transition-all"
-                  >
-                    Practice 10 Questions
-                  </Link>
-                  <Link
-                    href="/student/ai-tutor"
-                    className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700 transition-all"
                   >
                     Ask AI Tutor
                   </Link>
                   <Link
-                    href="/student/tutors?subject=Mathematics&topic=Probability"
+                    href="/student/tutors?subject=DBMS&topic=Normalization"
                     className="px-3 py-1.5 rounded-xl bg-slate-800 text-indigo-300 text-xs font-medium hover:bg-slate-700 transition-all"
                   >
-                    Connect with Tutor
+                    Connect with Human Tutor
                   </Link>
                 </div>
               </div>
@@ -185,11 +213,11 @@ export default function StudentDashboard() {
               <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="text-sm font-bold text-white">Trigonometry</h4>
+                    <h4 className="text-sm font-bold text-white">Probability & Bayes Theorem</h4>
                     <p className="text-xs text-slate-400">Mathematics</p>
                   </div>
                   <span className="text-xs font-extrabold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30">
-                    55% Score
+                    Developing
                   </span>
                 </div>
 
@@ -198,10 +226,10 @@ export default function StudentDashboard() {
                     href="/student/practice"
                     className="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-500 transition-all"
                   >
-                    Practice 10 Questions
+                    Practice Quiz
                   </Link>
                   <Link
-                    href="/student/ai-tutor"
+                    href="/student/ai-tutor?subject=Mathematics&topic=Probability"
                     className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700 transition-all"
                   >
                     Ask AI Tutor
@@ -241,5 +269,13 @@ export default function StudentDashboard() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function StudentDashboard() {
+  return (
+    <ProtectedRoute allowedRoles={['student']}>
+      <StudentDashboardContent />
+    </ProtectedRoute>
   );
 }

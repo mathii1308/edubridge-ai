@@ -12,25 +12,37 @@ def seed_database():
     Base.metadata.create_all(bind=engine)
     db: Session = SessionLocal()
 
+    # Ensure demo accounts exist
+    DEMO_PASS_HASH = "pbkdf2_sha256$260000$demo_salt$5f4dcc3b5aa765d61d8327deb882cf99"
+    if not db.query(User).filter(User.email == "student.demo@edubridge.local").first():
+        s_demo = User(name="Demo Student", email="student.demo@edubridge.local", password_hash=DEMO_PASS_HASH, role="student", email_verified=True, account_status="active")
+        t_demo_u = User(name="Demo Tutor (Dr. Rajesh)", email="tutor.demo@edubridge.local", password_hash=DEMO_PASS_HASH, role="teacher", email_verified=True, account_status="active")
+        a_demo_u = User(name="Demo Admin", email="admin.demo@edubridge.local", password_hash=DEMO_PASS_HASH, role="admin", email_verified=True, account_status="active")
+        db.add_all([s_demo, t_demo_u, a_demo_u])
+        db.commit()
+        db.add(StudentProfile(user_id=s_demo.id, preferred_language="English", learning_level="Intermediate"))
+        db.add(TeacherProfile(user_id=t_demo_u.id, bio="Demo Tutor", experience=10, rating=4.9, teaching_mode="Online", verified=True))
+        db.commit()
+
     # Check if already seeded
     if db.query(User).filter(User.email == "student@edubridge.ai").first():
-        print("Database already seeded.")
+        print("Database base accounts already present.")
         db.close()
         return
 
     print("Seeding database with production demo dataset...")
 
-    # Standard Hashed Password representation for 'password123'
-    DEMO_PASS_HASH = "pbkdf2_sha256$260000$demo_salt$5f4dcc3b5aa765d61d8327deb882cf99"
-
     # 1. Users
-    student_user = User(name="Ananya Sharma", email="student@edubridge.ai", password_hash=DEMO_PASS_HASH, role="student")
-    tutor_user1 = User(name="Dr. Rajesh Kumar", email="tutor.rajesh@edubridge.ai", password_hash=DEMO_PASS_HASH, role="teacher")
-    tutor_user2 = User(name="Prof. Lakshmi Priya", email="tutor.lakshmi@edubridge.ai", password_hash=DEMO_PASS_HASH, role="teacher")
-    tutor_user3 = User(name="Karthik Sundaram", email="tutor.karthik@edubridge.ai", password_hash=DEMO_PASS_HASH, role="teacher")
-    admin_user = User(name="EduBridge Admin", email="admin@edubridge.ai", password_hash=DEMO_PASS_HASH, role="admin")
+    student_user = User(name="Ananya Sharma", email="student@edubridge.ai", password_hash=DEMO_PASS_HASH, role="student", email_verified=True, account_status="active")
+    student_demo = User(name="Demo Student", email="student.demo@edubridge.local", password_hash=DEMO_PASS_HASH, role="student", email_verified=True, account_status="active")
+    tutor_user1 = User(name="Dr. Rajesh Kumar", email="tutor.rajesh@edubridge.ai", password_hash=DEMO_PASS_HASH, role="teacher", email_verified=True, account_status="active")
+    tutor_demo = User(name="Demo Tutor (Dr. Rajesh)", email="tutor.demo@edubridge.local", password_hash=DEMO_PASS_HASH, role="teacher", email_verified=True, account_status="active")
+    tutor_user2 = User(name="Prof. Lakshmi Priya", email="tutor.lakshmi@edubridge.ai", password_hash=DEMO_PASS_HASH, role="teacher", email_verified=True, account_status="active")
+    tutor_user3 = User(name="Karthik Sundaram", email="tutor.karthik@edubridge.ai", password_hash=DEMO_PASS_HASH, role="teacher", email_verified=True, account_status="active")
+    admin_user = User(name="EduBridge Admin", email="admin@edubridge.ai", password_hash=DEMO_PASS_HASH, role="admin", email_verified=True, account_status="active")
+    admin_demo = User(name="Demo Admin", email="admin.demo@edubridge.local", password_hash=DEMO_PASS_HASH, role="admin", email_verified=True, account_status="active")
 
-    db.add_all([student_user, tutor_user1, tutor_user2, tutor_user3, admin_user])
+    db.add_all([student_user, student_demo, tutor_user1, tutor_demo, tutor_user2, tutor_user3, admin_user, admin_demo])
     db.commit()
 
     # 2. Student Profile
@@ -45,13 +57,32 @@ def seed_database():
         academic_score=84.5,
         income_range=180000.0
     )
-    db.add(student_profile)
+    student_demo_profile = StudentProfile(
+        user_id=student_demo.id,
+        education_level="High School",
+        institution="Central Higher Secondary School, Chennai",
+        preferred_language="English",
+        learning_level="Intermediate",
+        state="Tamil Nadu",
+        course="Class 12 Science",
+        academic_score=88.0,
+        income_range=200000.0
+    )
+    db.add_all([student_profile, student_demo_profile])
     db.commit()
 
     # 3. Teacher Profiles
     t1 = TeacherProfile(
         user_id=tutor_user1.id,
-        bio="Senior Mathematics lecturer with 12+ years experience simplifying Calculus & Probability for competitive exams.",
+        bio="Senior Mathematics lecturer with 12+ years experience simplifying Calculus, Probability & DBMS Normalization for competitive exams.",
+        experience=12,
+        rating=4.9,
+        teaching_mode="Online",
+        verified=True
+    )
+    t_demo = TeacherProfile(
+        user_id=tutor_demo.id,
+        bio="Senior Mathematics & DBMS lecturer with 12+ years experience.",
         experience=12,
         rating=4.9,
         teaching_mode="Online",
@@ -59,7 +90,7 @@ def seed_database():
     )
     t2 = TeacherProfile(
         user_id=tutor_user2.id,
-        bio="Physics PhD Researcher specializing in Quantum Mechanics, Optics, and Electromagnetism with bilingual proficiency (English & Tamil).",
+        bio="Physics PhD Researcher specializing in Quantum Mechanics, Optics, Electromagnetism and Database Design with bilingual proficiency (English & Tamil).",
         experience=8,
         rating=4.85,
         teaching_mode="Both",
@@ -73,7 +104,7 @@ def seed_database():
         teaching_mode="Online",
         verified=True
     )
-    db.add_all([t1, t2, t3])
+    db.add_all([t1, t_demo, t2, t3])
     db.commit()
 
     # Teacher Languages
@@ -89,7 +120,8 @@ def seed_database():
     math = Subject(name="Mathematics")
     physics = Subject(name="Physics")
     chemistry = Subject(name="Chemistry")
-    db.add_all([math, physics, chemistry])
+    dbms = Subject(name="DBMS")
+    db.add_all([math, physics, chemistry, dbms])
     db.commit()
 
     top_prob = Topic(subject_id=math.id, name="Probability")
@@ -99,15 +131,16 @@ def seed_database():
     top_elec = Topic(subject_id=physics.id, name="Electromagnetism")
     top_org = Topic(subject_id=chemistry.id, name="Organic Reaction Mechanisms")
     top_thermo = Topic(subject_id=chemistry.id, name="Thermodynamics")
+    top_norm = Topic(subject_id=dbms.id, name="Normalization")
 
-    db.add_all([top_prob, top_trig, top_calc, top_optics, top_elec, top_org, top_thermo])
+    db.add_all([top_prob, top_trig, top_calc, top_optics, top_elec, top_org, top_thermo, top_norm])
     db.commit()
 
     # Link Tutors to Subjects & Topics
-    t1.subjects.extend([math])
-    t1.topics.extend([top_prob, top_trig, top_calc])
-    t2.subjects.extend([physics, math])
-    t2.topics.extend([top_optics, top_elec, top_trig])
+    t1.subjects.extend([math, dbms])
+    t1.topics.extend([top_prob, top_trig, top_calc, top_norm])
+    t2.subjects.extend([physics, math, dbms])
+    t2.topics.extend([top_optics, top_elec, top_trig, top_norm])
     t3.subjects.extend([chemistry])
     t3.topics.extend([top_org, top_thermo])
     db.commit()

@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ScholarshipCard } from '@/components/scholarships/ScholarshipCard';
 import { Scholarship } from '@/types';
+import { useAuth } from '@/lib/auth';
 import { Award, ShieldCheck, Search, Filter } from 'lucide-react';
 
-export default function ScholarshipsPage() {
+function ScholarshipsContent() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'recommended' | 'closing' | 'saved'>('recommended');
 
   const [scholarships, setScholarships] = useState<Scholarship[]>([
@@ -33,9 +35,9 @@ export default function ScholarshipsPage() {
       is_eligible: true,
       match_percentage: 95.0,
       eligibility_reasons: [
-        "✓ Academic score (84.5%) meets minimum requirement (60.0%)",
-        "✓ Family income (₹1,80,000) is within maximum ceiling (₹2,50,000)",
-        "✓ State domicile (Tamil Nadu) is eligible"
+        "✓ Academic score meets minimum requirement (60.0%)",
+        "✓ Family income is within maximum ceiling (₹2,50,000)",
+        "✓ State domicile requirement matched"
       ]
     },
     {
@@ -59,8 +61,8 @@ export default function ScholarshipsPage() {
       is_eligible: true,
       match_percentage: 90.0,
       eligibility_reasons: [
-        "✓ Academic score (84.5%) meets state requirement (75.0%)",
-        "✓ Family income (₹1,80,000) within ceiling (₹2,00,000)",
+        "✓ Academic score meets state requirement (75.0%)",
+        "✓ Family income within ceiling (₹2,00,000)",
         "✓ Tamil Nadu resident domicile match"
       ]
     },
@@ -85,8 +87,8 @@ export default function ScholarshipsPage() {
       is_eligible: true,
       match_percentage: 88.0,
       eligibility_reasons: [
-        "✓ Academic score (84.5%) meets requirement (55.0%)",
-        "✓ Family income (₹1,80,000) within ceiling (₹3,50,000)",
+        "✓ Academic score meets requirement (55.0%)",
+        "✓ Family income within ceiling (₹3,50,000)",
         "✓ Open to all Indian states"
       ]
     }
@@ -110,7 +112,6 @@ export default function ScholarshipsPage() {
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -125,7 +126,7 @@ export default function ScholarshipsPage() {
                 <span className="text-xs font-semibold uppercase tracking-wider">Verified Official Scholarship Engine</span>
               </div>
               <h1 className="text-xl font-bold text-white">Verified Educational Opportunities</h1>
-              <p className="text-xs text-slate-400 mt-0.5">Matched deterministically against your academic score (84.5%), income (₹1.8L), state (Tamil Nadu), and course level.</p>
+              <p className="text-xs text-slate-400 mt-0.5">Matched deterministically against your academic profile for account ({user?.email}).</p>
             </div>
 
             <div className="flex items-center space-x-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-2xl border border-emerald-500/30">
@@ -142,7 +143,7 @@ export default function ScholarshipsPage() {
                 activeTab === 'recommended' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Recommended Matches (3)
+              Recommended Matches ({scholarships.length})
             </button>
             <button
               onClick={() => setActiveTab('closing')}
@@ -171,5 +172,13 @@ export default function ScholarshipsPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function ScholarshipsPage() {
+  return (
+    <ProtectedRoute allowedRoles={['student']}>
+      <ScholarshipsContent />
+    </ProtectedRoute>
   );
 }

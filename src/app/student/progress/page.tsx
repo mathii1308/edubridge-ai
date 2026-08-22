@@ -3,13 +3,12 @@
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ProgressCharts } from '@/components/progress/ProgressCharts';
 
-export default function StudentProgressPage() {
+function StudentProgressContent() {
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -25,5 +24,13 @@ export default function StudentProgressPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function StudentProgressPage() {
+  return (
+    <ProtectedRoute allowedRoles={['student']}>
+      <StudentProgressContent />
+    </ProtectedRoute>
   );
 }

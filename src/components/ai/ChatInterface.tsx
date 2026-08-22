@@ -15,7 +15,9 @@ import {
   ExternalLink,
   Languages,
   UserCheck,
-  AlertTriangle
+  AlertTriangle,
+  ThumbsUp,
+  ThumbsDown
 } from 'lucide-react';
 
 export const ChatInterface: React.FC = () => {
@@ -23,7 +25,7 @@ export const ChatInterface: React.FC = () => {
     {
       id: '1',
       sender: 'ai',
-      text: "Hello! I am EduBridge AI, your personalized academic tutor. Select your subject or topic, and ask me anything. If a concept feels difficult, click 'I still don't understand' anytime to try simpler steps or connect directly with a verified human tutor.",
+      text: "Hello! I am EduBridge AI, your personalized academic tutor. Select your subject or topic and ask me any doubt. If you struggle with a concept, you can escalate directly to a verified human tutor anytime.",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     }
   ]);
@@ -31,8 +33,9 @@ export const ChatInterface: React.FC = () => {
   const [input, setInput] = useState('');
   const [language, setLanguage] = useState<'English' | 'Tamil'>('English');
   const [learningLevel, setLearningLevel] = useState<'Beginner' | 'Intermediate' | 'Advanced'>('Intermediate');
-  const [subject, setSubject] = useState('Mathematics');
-  const [topic, setTopic] = useState('Probability');
+  const [subject, setSubject] = useState('DBMS');
+  const [topic, setTopic] = useState('Normalization');
+  const [studentRequirement, setStudentRequirement] = useState('Needs explanation of 2NF and 3NF');
 
   const [isLoading, setIsLoading] = useState(false);
   const [showHandoffModal, setShowHandoffModal] = useState(false);
@@ -54,7 +57,7 @@ export const ChatInterface: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Call FastAPI AI chat API endpoint with RAG context lookup
+      // Call FastAPI AI chat API endpoint
       const res = await fetch('http://localhost:8000/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -88,23 +91,26 @@ export const ChatInterface: React.FC = () => {
       };
 
       setMessages((prev) => [...prev, aiMsg]);
+      if (data.subject) setSubject(data.subject);
+      if (data.topic) setTopic(data.topic);
+      if (data.learning_gap) setStudentRequirement(data.learning_gap);
 
       if (data.needs_tutor || actionType === 'struggle') {
         setShowHandoffModal(true);
       }
     } catch {
-      // Fallback grounded AI response for local demo environments
+      // Offline AI response engine
       const isStruggle = actionType === 'struggle' || queryText.toLowerCase().includes("don't understand");
-      
+
       let replyText = "";
       if (isStruggle) {
         replyText = language === 'Tamil'
-          ? `**மன்னிக்கவும், ${topic} தலைப்பு உங்களுக்கு சவாலாக உள்ளது.** நாங்கள் மீண்டும் எளிய முறையில் விளக்க முயன்றோம். நேரலை ஆசிரியரை அணுக தயாரா?`
-          : `**I understand this concept is tricky!** Learning ${topic} takes step-by-step guidance. Connecting with a human tutor will help you master it faster.`;
+          ? `**${topic} பற்றிய விளக்கம் இன்னமும் கடினமாக உள்ளதா?** நாங்கள் உங்களுக்கு உதவ தகுதியான ஆசிரியரை பரிந்துரைக்க முடியும்.`
+          : `**I understand this concept is tricky!** Learning ${topic} (${subject}) requires step-by-step guidance. Connecting with a human tutor will help you master it faster.`;
       } else {
         replyText = language === 'Tamil'
-          ? `**EduBridge AI கற்றல் வழிகாட்டி (${subject} - ${topic}):**\n\nசார்பு நிகழ்தகவு சூத்திரம்: P(A|B) = P(A ∩ B) / P(B).\n\n1. முதல் நிகழ்ச்சி நடந்த பிறகுதான் இரண்டாம் நிகழ்ச்சி நடக்கும்.\n2. மூல நூல்: தமிழ்நாடு கல்வி பாடநூல் 12.`
-          : `**Step-by-Step Explanation for ${topic} (${subject}):**\n\nConditional probability measures the chance of event A given event B has occurred.\n\n• **Formula:** P(A|B) = P(A ∩ B) / P(B)\n• **Key Rule:** P(B) must be > 0.`;
+          ? `**EduBridge AI கற்றல் உதவியாளர் (${subject} - ${topic}):**\n\nசார்பு நிகழ்தகவு சூத்திரம்: P(A|B) = P(A ∩ B) / P(B).\n\n1. முதல் நிகழ்ச்சி நிகழ்ந்த பிறகுதான் இரண்டாம் நிகழ்ச்சி நடக்கும்.`
+          : `**Step-by-Step Explanation for ${topic} (${subject}):**\n\n1. **Concept Definition:** Normalization is the process of organizing data in a database to reduce redundancy.\n2. **2NF (Second Normal Form):** Every non-key attribute must be fully functionally dependent on the primary key (no partial dependencies).\n3. **3NF (Third Normal Form):** No non-key attribute is transitively dependent on the primary key.`;
       }
 
       const fallbackMsg: ChatMessage = {
@@ -113,14 +119,7 @@ export const ChatInterface: React.FC = () => {
         text: replyText,
         subject: subject,
         topic: topic,
-        citations: [
-          {
-            title: "OpenStax University Mathematics: Probability",
-            source_name: "OpenStax Educational Initiative",
-            source_url: "https://openstax.org/details/books/introductory-statistics",
-            snippet: "P(A|B) = P(A ∩ B) / P(B). Conditional probability evaluates outcome likelihood under prior constraints."
-          }
-        ],
+        citations: [], // Clean empty array if no retrieval source
         needs_tutor: isStruggle,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
@@ -145,8 +144,8 @@ export const ChatInterface: React.FC = () => {
           <div>
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
               EduBridge AI Tutor
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-medium">
-                RAG Grounded
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 font-medium">
+                AI Tutor Engine
               </span>
             </h2>
             <p className="text-[11px] text-slate-400">Subject: {subject} • Topic: {topic}</p>
@@ -217,12 +216,12 @@ export const ChatInterface: React.FC = () => {
               >
                 <div className="whitespace-pre-wrap">{msg.text}</div>
 
-                {/* Grounded RAG Citations */}
+                {/* Educational Citations */}
                 {msg.citations && msg.citations.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-slate-800/80 space-y-1.5">
                     <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1">
                       <BookOpen className="w-3 h-3 text-indigo-400" />
-                      Grounded Educational Citations:
+                      Educational Sources:
                     </p>
                     {msg.citations.map((c, i) => (
                       <a
@@ -238,6 +237,27 @@ export const ChatInterface: React.FC = () => {
                     ))}
                   </div>
                 )}
+
+                {/* Escalation Feedback Check on AI Messages */}
+                {msg.sender === 'ai' && (
+                  <div className="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                    <span>Did this explanation help?</span>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => sendMessage("Yes, thank you! I understand this concept now.", "understand")}
+                        className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 flex items-center gap-1 font-medium"
+                      >
+                        <ThumbsUp className="w-3 h-3 text-emerald-400" /> Yes, I understand
+                      </button>
+                      <button
+                        onClick={() => sendMessage(`I still don't understand ${topic} in ${subject}.`, "struggle")}
+                        className="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 flex items-center gap-1 font-medium"
+                      >
+                        <ThumbsDown className="w-3 h-3 text-amber-400" /> Not yet
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <span className="text-[10px] text-slate-500 px-1">{msg.timestamp}</span>
@@ -248,14 +268,14 @@ export const ChatInterface: React.FC = () => {
         {isLoading && (
           <div className="flex items-center space-x-2 text-indigo-400 text-xs p-3">
             <Sparkles className="w-4 h-4 animate-spin" />
-            <span>Consulting Educational Knowledge Base...</span>
+            <span>Consulting AI Learning Engine...</span>
           </div>
         )}
       </div>
 
       {/* Quick Action Prompt Pills */}
       <div className="p-3 bg-slate-900/80 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
-        <span className="text-[11px] text-slate-400 font-medium mr-1">Quick Actions:</span>
+        <span className="text-[11px] text-slate-400 font-medium mr-1">Controls:</span>
         <button
           onClick={() => sendMessage("Can you explain this step-by-step in simpler terms?", "simplify")}
           className="px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1.5"
@@ -270,12 +290,11 @@ export const ChatInterface: React.FC = () => {
           <BookOpen className="w-3 h-3 text-emerald-400" /> Real-World Example
         </button>
 
-        {/* CORE FEATURE: "I still don't understand" trigger */}
         <button
-          onClick={() => sendMessage("I still don't understand quadratic probability.", "struggle")}
+          onClick={() => sendMessage(`I need help from a human tutor for ${subject} (${topic}).`, "struggle")}
           className="px-3 py-1 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-[11px] text-amber-300 font-semibold transition-all flex items-center gap-1.5"
         >
-          <AlertTriangle className="w-3 h-3 text-amber-400 animate-bounce" /> I still don't understand
+          <AlertTriangle className="w-3 h-3 text-amber-400" /> Connect with Human Tutor
         </button>
       </div>
 
@@ -286,7 +305,7 @@ export const ChatInterface: React.FC = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-          placeholder={language === 'Tamil' ? "உங்கள் கேள்வியைக் கேளுங்கள்..." : "Ask any academic doubt (e.g. Explain conditional probability)..."}
+          placeholder={language === 'Tamil' ? "உங்கள் கேள்வியைக் கேளுங்கள்..." : "Ask your academic doubt..."}
           className="flex-1 bg-slate-800/90 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all"
         />
         <button
@@ -306,6 +325,7 @@ export const ChatInterface: React.FC = () => {
         topic={topic}
         language={language}
         learningLevel={learningLevel}
+        studentRequirement={studentRequirement}
       />
     </div>
   );

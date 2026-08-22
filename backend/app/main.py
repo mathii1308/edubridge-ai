@@ -5,7 +5,7 @@ from app.database.seed_data import seed_database
 from app.websockets.connection_manager import manager
 
 app = FastAPI(
-    title="EduBridge AI — AI-Powered Education Access Platform API",
+    title="EduBridge AI — Learning Platform API",
     description="Full-stack educational access backend providing grounded AI tutoring, RAG knowledge retrieval, real-time tutor availability & booking, adaptive progress analytics, and verified scholarship eligibility matching.",
     version="1.0.0"
 )

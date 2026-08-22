@@ -3,10 +3,10 @@
 import React, { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { BookOpen, ShieldCheck, Plus, CheckCircle2 } from 'lucide-react';
 
-export default function AdminResourcesPage() {
+function AdminResourcesContent() {
   const [resources] = useState([
     {
       id: 1,
@@ -32,7 +32,6 @@ export default function AdminResourcesPage() {
 
   return (
     <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
-      <RoleSwitcher />
       <Navbar />
 
       <div className="flex flex-1">
@@ -41,7 +40,7 @@ export default function AdminResourcesPage() {
         <main className="flex-1 p-6 space-y-6 max-w-7xl">
           <div className="glass-card rounded-3xl p-6 border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-xl font-bold text-white">RAG Knowledge Base & Educational Resources</h1>
+              <h1 className="text-xl font-bold text-white">AI Knowledge Base & Educational Resources</h1>
               <p className="text-xs text-slate-400 mt-1">Ingest open educational textbooks and public academic resources for AI Tutor grounding.</p>
             </div>
 
@@ -78,5 +77,13 @@ export default function AdminResourcesPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function AdminResourcesPage() {
+  return (
+    <ProtectedRoute allowedRoles={['admin']}>
+      <AdminResourcesContent />
+    </ProtectedRoute>
   );
 }
