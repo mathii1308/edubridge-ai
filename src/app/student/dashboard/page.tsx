@@ -48,7 +48,7 @@ function StudentDashboardContent() {
           const res = await fetch(`http://localhost:8000/bookings?user_role=student&user_id=${user.id}`);
           if (res.ok) {
             const data: Booking[] = await res.json();
-            const active = data.find(b => b.status === 'accepted' || b.status === 'pending');
+            const active = data.find(b => b.status === 'accepted' || b.status === 'requested');
             setUpcomingBooking(active || null);
           }
         } catch {
@@ -201,19 +201,39 @@ function StudentDashboardContent() {
               </div>
 
               {enrolledSubjects.length === 0 ? (
-                <p className="text-xs text-slate-500 py-4 text-center">Add enrolled subjects above to track your quiz accuracy and concept mastery.</p>
+                <div className="py-6 text-center text-slate-500 text-xs">
+                  <p>No subjects enrolled yet. Add subjects above to track your real practice quiz performance and learning progress.</p>
+                </div>
               ) : (
                 <div className="space-y-4">
-                  {enrolledSubjects.map((subj, idx) => {
-                    const score = 70 + (idx * 5) % 25;
+                  {enrolledSubjects.map((subj) => {
+                    // Calculate real quiz accuracy from saved activity
+                    const historySaved = localStorage.getItem(`quiz_history_${user?.id || 'default'}`);
+                    let realScore: number | null = null;
+                    if (historySaved) {
+                      try {
+                        const historyArr = JSON.parse(historySaved);
+                        const subjQuizzes = historyArr.filter((q: any) => q.subject === subj);
+                        if (subjQuizzes.length > 0) {
+                          const totalPct = subjQuizzes.reduce((acc: number, curr: any) => acc + curr.scorePct, 0);
+                          realScore = Math.round(totalPct / subjQuizzes.length);
+                        }
+                      } catch (e) {}
+                    }
+
                     return (
                       <div key={subj}>
                         <div className="flex justify-between text-xs font-semibold mb-1.5">
                           <span className="text-slate-800">{subj}</span>
-                          <span className="text-blue-700">{score}% Mastery</span>
+                          <span className="text-blue-700">
+                            {realScore !== null ? `${realScore}% Mastery` : 'No quiz activity yet'}
+                          </span>
                         </div>
                         <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-blue-600 rounded-full" style={{ width: `${score}%` }}></div>
+                          <div
+                            className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                            style={{ width: `${realScore !== null ? realScore : 0}%` }}
+                          ></div>
                         </div>
                       </div>
                     );

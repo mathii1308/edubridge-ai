@@ -16,23 +16,31 @@ function TeacherBookingsContent() {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
-    if (user?.id) {
-      const fetchBookings = async () => {
-        try {
-          const res = await fetch(`http://localhost:8000/bookings?user_role=teacher&user_id=${user.id}`);
-          if (res.ok) {
-            const data = await res.json();
-            setBookings(data);
-          } else {
-            setBookings([]);
-          }
-        } catch {
-          setBookings([]);
+    const loadBookings = async () => {
+      let list: Booking[] = [];
+      try {
+        const res = await fetch(`http://localhost:8000/bookings?user_role=teacher&user_id=${user?.id || 2}`);
+        if (res.ok) {
+          list = await res.json();
         }
-      };
+      } catch (e) {}
 
-      fetchBookings();
-    }
+      // Merge with local storage bookings
+      try {
+        const saved = localStorage.getItem('edubridge_bookings');
+        if (saved) {
+          const localArr = JSON.parse(saved);
+          const existingIds = new Set(list.map(b => b.id));
+          localArr.forEach((b: Booking) => {
+            if (!existingIds.has(b.id)) list.push(b);
+          });
+        }
+      } catch (e) {}
+
+      setBookings(list);
+    };
+
+    loadBookings();
   }, [user?.id]);
 
   const handleAction = async (id: number, newStatus: 'accepted' | 'rejected') => {
@@ -42,11 +50,15 @@ function TeacherBookingsContent() {
       });
     } catch {
       // Local fallback
-    } finally {
-      setBookings((prev) =>
-        prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b))
-      );
     }
+
+    setBookings((prev) => {
+      const updated = prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b));
+      try {
+        localStorage.setItem('edubridge_bookings', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   return (
@@ -114,7 +126,7 @@ function TeacherBookingsContent() {
                       <span>Open Chat</span>
                     </button>
 
-                    {b.status === 'requested' || b.status === 'pending' ? (
+                    {b.status === 'requested' ? (
                       <>
                         <button
                           onClick={() => handleAction(b.id, 'accepted')}

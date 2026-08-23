@@ -46,15 +46,19 @@ export const Sidebar: React.FC = () => {
     { href: '/teacher/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/teacher/availability', label: 'Availability Grid', icon: Clock },
     { href: '/teacher/bookings', label: 'Booking Requests', icon: CalendarDays },
+    { href: '/teacher/sessions', label: 'My Sessions', icon: CalendarDays },
     { href: '/teacher/students', label: 'Student Learning Gaps', icon: Users },
+    { href: '/teacher/resources', label: 'Education Resources', icon: BookOpen },
+    { href: '/teacher/analytics', label: 'Analytics', icon: TrendingUp },
     { href: '/teacher/profile', label: 'Tutor Profile', icon: User },
   ];
 
   const adminLinks: NavLink[] = [
-    { href: '/admin/dashboard', label: 'Overview Analytics', icon: LayoutDashboard },
+    { href: '/admin/dashboard', label: 'Dashboard Analytics', icon: LayoutDashboard },
+    { href: '/admin/users', label: 'User Management', icon: Users },
     { href: '/admin/resources', label: 'Educational Resources', icon: BookOpen },
-    { href: '/admin/scholarships', label: 'Scholarship Verifier', icon: Award },
-    { href: '/admin/users', label: 'Manage Users', icon: Users },
+    { href: '/admin/scholarships', label: 'Scholarship Management', icon: Award },
+    { href: '/admin/profile', label: 'Admin Profile', icon: User },
   ];
 
   const currentLinks: NavLink[] = role === 'teacher' ? teacherLinks : role === 'admin' ? adminLinks : studentLinks;

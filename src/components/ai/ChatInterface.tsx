@@ -20,6 +20,7 @@ import {
 
 const SAMPLE_REFERENCES = [
   "General Academic Knowledge",
+  "Custom Uploaded Student Notes / Textbook",
   "OpenStax University Mathematics: Probability & Calculus",
   "NCERT Standard 12 Physics & Wave Optics",
   "Fundamentals of Database Systems (Elmasri & Navathe)",
