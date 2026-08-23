@@ -1,3 +1,8 @@
 node_modules/
 .next/
 .env
+
+# Python
+backend/venv/
+__pycache__/
+*.pyc
