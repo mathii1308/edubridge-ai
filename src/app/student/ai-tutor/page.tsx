@@ -8,7 +8,7 @@ import { ChatInterface } from '@/components/ai/ChatInterface';
 
 function AITutorContent() {
   return (
-    <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
+    <div className="min-h-screen bg-slate-50 flex flex-col text-slate-900">
       <Navbar />
 
       <div className="flex flex-1">
@@ -29,3 +29,4 @@ export default function AITutorPage() {
     </ProtectedRoute>
   );
 }
+

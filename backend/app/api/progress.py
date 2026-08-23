@@ -56,3 +56,70 @@ def get_topic_progress_list(student_id: int = 1, db: Session = Depends(get_db)):
             "mastery_level": r.mastery_level
         })
     return res
+
+from app.models.schemas import LearningGapNote
+from fastapi import HTTPException
+
+@router.get("/notes")
+def get_learning_gap_notes(student_id: int = 1, db: Session = Depends(get_db)):
+    notes = db.query(LearningGapNote).filter(LearningGapNote.student_id == student_id).order_by(LearningGapNote.updated_at.desc()).all()
+    return [{
+        "id": n.id,
+        "student_id": n.student_id,
+        "topic_name": n.topic_name,
+        "subject_name": n.subject_name,
+        "note_text": n.note_text,
+        "author_role": n.author_role,
+        "created_at": n.created_at,
+        "updated_at": n.updated_at
+    } for n in notes]
+
+@router.post("/notes")
+def create_learning_gap_note(
+    topic_name: str,
+    subject_name: str,
+    note_text: str,
+    student_id: int = 1,
+    author_role: str = "student",
+    db: Session = Depends(get_db)
+):
+    note = LearningGapNote(
+        student_id=student_id,
+        topic_name=topic_name,
+        subject_name=subject_name,
+        note_text=note_text,
+        author_role=author_role
+    )
+    db.add(note)
+    db.commit()
+    db.refresh(note)
+    return {
+        "id": note.id,
+        "student_id": note.student_id,
+        "topic_name": note.topic_name,
+        "subject_name": note.subject_name,
+        "note_text": note.note_text,
+        "author_role": note.author_role,
+        "created_at": note.created_at,
+        "updated_at": note.updated_at
+    }
+
+@router.put("/notes/{note_id}")
+def update_learning_gap_note(note_id: int, note_text: str, db: Session = Depends(get_db)):
+    note = db.query(LearningGapNote).filter(LearningGapNote.id == note_id).first()
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    note.note_text = note_text
+    db.commit()
+    db.refresh(note)
+    return {"id": note.id, "note_text": note.note_text, "updated_at": note.updated_at}
+
+@router.delete("/notes/{note_id}")
+def delete_learning_gap_note(note_id: int, db: Session = Depends(get_db)):
+    note = db.query(LearningGapNote).filter(LearningGapNote.id == note_id).first()
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    db.delete(note)
+    db.commit()
+    return {"status": "success", "message": f"Note {note_id} deleted"}
+

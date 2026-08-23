@@ -7,7 +7,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ScholarshipCard } from '@/components/scholarships/ScholarshipCard';
 import { Scholarship } from '@/types';
 import { useAuth } from '@/lib/auth';
-import { Award, ShieldCheck, Search, Filter } from 'lucide-react';
+import { Award, ShieldCheck } from 'lucide-react';
 
 function ScholarshipsContent() {
   const { user } = useAuth();
@@ -95,7 +95,6 @@ function ScholarshipsContent() {
   ]);
 
   useEffect(() => {
-    // Fetch verified recommended scholarships from FastAPI backend
     const fetchScholarships = async () => {
       try {
         const res = await fetch('http://localhost:8000/scholarships/recommended');
@@ -111,7 +110,7 @@ function ScholarshipsContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
+    <div className="min-h-screen bg-slate-50 flex flex-col text-slate-900">
       <Navbar />
 
       <div className="flex flex-1">
@@ -119,44 +118,44 @@ function ScholarshipsContent() {
 
         <main className="flex-1 p-6 space-y-6 max-w-7xl">
           {/* Header Banner */}
-          <div className="glass-card rounded-3xl p-6 border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center space-x-2 text-amber-400 mb-1">
+              <div className="flex items-center space-x-2 text-blue-600 mb-1">
                 <Award className="w-5 h-5" />
-                <span className="text-xs font-semibold uppercase tracking-wider">Verified Official Scholarship Engine</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Verified Official Scholarship Engine</span>
               </div>
-              <h1 className="text-xl font-bold text-white">Verified Educational Opportunities</h1>
-              <p className="text-xs text-slate-400 mt-0.5">Matched deterministically against your academic profile for account ({user?.email}).</p>
+              <h1 className="text-xl font-bold text-slate-900">Verified Educational Opportunities</h1>
+              <p className="text-xs text-slate-500 mt-0.5">Matched deterministically against your academic profile for account ({user?.email}).</p>
             </div>
 
-            <div className="flex items-center space-x-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-2xl border border-emerald-500/30">
-              <ShieldCheck className="w-4 h-4" />
+            <div className="flex items-center space-x-2 text-xs text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>Official Portals Synchronized</span>
             </div>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center space-x-2 border-b border-slate-800 pb-3 text-xs">
+          <div className="flex items-center space-x-2 border-b border-slate-200 pb-3 text-xs">
             <button
               onClick={() => setActiveTab('recommended')}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-                activeTab === 'recommended' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+              className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                activeTab === 'recommended' ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
               }`}
             >
               Recommended Matches ({scholarships.length})
             </button>
             <button
               onClick={() => setActiveTab('closing')}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-                activeTab === 'closing' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+              className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                activeTab === 'closing' ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
               }`}
             >
               Closing Soon
             </button>
             <button
               onClick={() => setActiveTab('saved')}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-                activeTab === 'saved' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+              className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                activeTab === 'saved' ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
               }`}
             >
               Saved Opportunities
@@ -182,3 +181,4 @@ export default function ScholarshipsPage() {
     </ProtectedRoute>
   );
 }
+

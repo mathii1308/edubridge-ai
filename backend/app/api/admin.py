@@ -30,10 +30,21 @@ def get_all_users(db: Session = Depends(get_db)):
     users = db.query(User).all()
     return [{"id": u.id, "name": u.name, "email": u.email, "role": u.role, "created_at": u.created_at} for u in users]
 
+@router.delete("/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    db.delete(user)
+    db.commit()
+    return {"status": "success", "message": f"User {user_id} deleted successfully"}
+
 @router.post("/scholarships/sync")
 def trigger_scholarship_sync(db: Session = Depends(get_db)):
     result = run_scholarship_sync_job(db)
     return result
+
 
 @router.post("/scholarships")
 def add_verified_scholarship(

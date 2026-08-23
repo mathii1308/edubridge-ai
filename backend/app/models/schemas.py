@@ -317,3 +317,17 @@ class Notification(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     user = relationship("User", back_populates="notifications")
+
+
+class LearningGapNote(Base):
+    __tablename__ = 'learning_gap_notes'
+
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey('student_profiles.id', ondelete="CASCADE"), nullable=False)
+    topic_name = Column(String(100), nullable=False)
+    subject_name = Column(String(100), nullable=False)
+    note_text = Column(Text, nullable=False)
+    author_role = Column(String(20), default="student")  # student, teacher
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+

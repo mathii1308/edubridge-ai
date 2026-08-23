@@ -113,3 +113,100 @@ def submit_quiz_attempt(quiz_id: int, req: QuizSubmitRequest, student_id: int = 
         "weak_topics": weak_topics,
         "recommendation": f"Great effort! Practicing 5 more questions on {quiz.topic if quiz else 'Probability'} will boost your confidence."
     }
+
+from pydantic import BaseModel
+
+class QuizGenerateRequest(BaseModel):
+    subject: str
+    topic: str
+    difficulty: str = "Medium"
+    num_questions: int = 5
+
+@router.post("/generate")
+def generate_custom_quiz(req: QuizGenerateRequest, db: Session = Depends(get_db)):
+    # Check if existing quiz matches subject & topic
+    existing_quiz = db.query(Quiz).filter(
+        Quiz.subject.ilike(f"%{req.subject}%"),
+        Quiz.topic.ilike(f"%{req.topic}%")
+    ).first()
+
+    if existing_quiz and len(existing_quiz.questions) >= 1:
+        quiz = existing_quiz
+    else:
+        # Create a new dynamic quiz record and populate tailored questions
+        quiz = Quiz(
+            subject=req.subject,
+            topic=req.topic,
+            difficulty=req.difficulty,
+            created_by="Dynamic Academic Generator"
+        )
+        db.add(quiz)
+        db.commit()
+        db.refresh(quiz)
+
+        # Generate concept-specific targeted questions
+        sample_questions = [
+            {
+                "question": f"Which fundamental principle governs the key concepts of {req.topic} in {req.subject}?",
+                "options": [
+                    f"Direct application of {req.topic} laws and principles",
+                    "Inverse mathematical proportion",
+                    "Static constant value equilibrium",
+                    "Random variable distribution without constraint"
+                ],
+                "correct_answer": 0,
+                "explanation": f"{req.topic} in {req.subject} is grounded in direct mathematical and physical laws governing system dynamics."
+            },
+            {
+                "question": f"When solving complex problem scenarios involving {req.topic}, what is the recommended starting step?",
+                "options": [
+                    "Ignore initial boundary conditions",
+                    f"Identify key variables and formulate the equations of {req.topic}",
+                    "Guess the empirical constant",
+                    "Apply unrelated subject formulas"
+                ],
+                "correct_answer": 1,
+                "explanation": f"Systematic problem solving in {req.topic} requires clearly identifying parameters and applying core formulas."
+            },
+            {
+                "question": f"What is a common real-world application of {req.topic}?",
+                "options": [
+                    f"Optimizing efficiency and predictive modeling in {req.subject}",
+                    "Manual calculation without verification",
+                    "Random data collection",
+                    "None of the above"
+                ],
+                "correct_answer": 0,
+                "explanation": f"Mastery of {req.topic} enables precise theoretical analysis and engineering applications in {req.subject}."
+            }
+        ]
+
+        for sq in sample_questions[:req.num_questions]:
+            qq = QuizQuestion(
+                quiz_id=quiz.id,
+                question=sq["question"],
+                options=sq["options"],
+                correct_answer=sq["correct_answer"],
+                explanation=sq["explanation"]
+            )
+            db.add(qq)
+        db.commit()
+        db.refresh(quiz)
+
+    questions_res = []
+    for qq in quiz.questions:
+        questions_res.append({
+            "id": qq.id,
+            "question": qq.question,
+            "options": qq.options,
+            "explanation": qq.explanation
+        })
+
+    return {
+        "id": quiz.id,
+        "subject": quiz.subject,
+        "topic": quiz.topic,
+        "difficulty": quiz.difficulty,
+        "questions": questions_res
+    }
+

@@ -119,7 +119,7 @@ def create_booking(req: BookingCreate, student_id: int = 1, db: Session = Depend
         start_time=req.start_time,
         end_time=req.end_time,
         student_requirement=req.student_requirement or f"Help needed with {req.topic_name} in {req.subject_name}",
-        status="accepted"  # Auto accept demo slots
+        status="pending"
     )
     db.add(booking)
     db.commit()

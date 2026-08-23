@@ -21,7 +21,6 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [verificationPending, setVerificationPending] = useState(false);
-  const [registeredUser, setRegisteredUser] = useState<any>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,14 +58,12 @@ export default function RegisterPage() {
         throw new Error(data.detail || "Registration failed");
       }
 
-      setRegisteredUser(data.user);
       setVerificationPending(true);
       login(data.user, data.access_token);
     } catch (err: any) {
       if (err.message.includes("already registered")) {
         setErrorMsg("This email address is already registered. Please sign in instead.");
       } else {
-        // Fallback demo registration mode if API is unreachable
         const mockUser = {
           id: Date.now(),
           name,
@@ -76,7 +73,6 @@ export default function RegisterPage() {
           account_status: "unverified",
           created_at: new Date().toISOString()
         };
-        setRegisteredUser(mockUser);
         setVerificationPending(true);
         login(mockUser, "offline_demo_register_token");
       }
@@ -105,32 +101,32 @@ export default function RegisterPage() {
 
   if (verificationPending) {
     return (
-      <div className="min-h-screen bg-[#090d16] flex items-center justify-center p-6 text-slate-100">
-        <div className="glass-card max-w-md w-full rounded-3xl p-8 border border-slate-800 space-y-6 shadow-2xl text-center">
-          <div className="w-16 h-16 rounded-3xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-slate-900">
+        <div className="bg-white max-w-md w-full rounded-xl p-8 border border-slate-200 space-y-6 shadow-xs text-center">
+          <div className="w-16 h-16 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center mx-auto text-blue-600">
             <Mail className="w-8 h-8" />
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white">Verify Your Email Address</h2>
-            <p className="text-xs text-slate-300">
-              We have sent a verification code to <strong className="text-indigo-300">{email}</strong>.
+            <h2 className="text-2xl font-bold text-slate-900">Verify Your Email Address</h2>
+            <p className="text-xs text-slate-500">
+              We have sent a verification code to <strong className="text-blue-700">{email}</strong>.
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs text-slate-400 space-y-2 text-left">
+          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-2 text-left">
             <div className="flex justify-between">
               <span>Account Name:</span>
-              <span className="font-semibold text-slate-200">{name}</span>
+              <span className="font-bold text-slate-900">{name}</span>
             </div>
             <div className="flex justify-between">
               <span>Assigned Role:</span>
-              <span className="font-semibold uppercase text-indigo-400">{role}</span>
+              <span className="font-bold uppercase text-blue-700">{role}</span>
             </div>
             <div className="flex justify-between">
               <span>Verification Status:</span>
-              <span className="font-semibold text-amber-400 flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> Pending Verification
+              <span className="font-bold text-amber-700 flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-amber-500"></span> Pending Verification
               </span>
             </div>
           </div>
@@ -138,10 +134,10 @@ export default function RegisterPage() {
           <button
             onClick={handleVerifyEmail}
             disabled={isLoading}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center space-x-2"
+            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-2xs transition-all flex items-center justify-center space-x-2"
           >
             {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-            <span>Simulate Verification & Open Dashboard</span>
+            <span>Complete Verification & Open Dashboard</span>
           </button>
         </div>
       </div>
@@ -149,26 +145,26 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#090d16] flex items-center justify-center p-6 text-slate-100">
-      <div className="glass-card max-w-md w-full rounded-3xl p-8 border border-slate-800 space-y-6 shadow-2xl">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-slate-900">
+      <div className="bg-white max-w-md w-full rounded-xl p-8 border border-slate-200 space-y-6 shadow-xs">
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/30">
+          <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center mx-auto shadow-2xs">
             <Sparkles className="w-6 h-6 text-white" />
           </div>
-          <h2 className="text-2xl font-extrabold text-white">Create Your Account</h2>
-          <p className="text-xs text-slate-400">Join EduBridge AI platform as a Student or Educator</p>
+          <h2 className="text-2xl font-extrabold text-slate-900">Create Academic Account</h2>
+          <p className="text-xs text-slate-500">Join EduBridge AI platform as a Student or Educator</p>
         </div>
 
         {errorMsg && (
-          <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300 flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center space-x-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="font-semibold text-slate-300 mb-1 block">Full Name:</label>
+            <label className="font-bold text-slate-700 mb-1 block">Full Name:</label>
             <div className="relative">
               <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
@@ -177,13 +173,13 @@ export default function RegisterPage() {
                 onChange={(e) => setName(e.target.value)}
                 required
                 placeholder="e.g. Ananya Sharma"
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-blue-600 font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="font-semibold text-slate-300 mb-1 block">Email Address:</label>
+            <label className="font-bold text-slate-700 mb-1 block">Email Address:</label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
@@ -191,22 +187,22 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="e.g. ananya@edubridge.ai"
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                placeholder="e.g. student@edubridge.ai"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-blue-600 font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="font-semibold text-slate-300 mb-1 block">Account Role:</label>
+            <label className="font-bold text-slate-700 mb-1 block">Account Role:</label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setRole('student')}
-                className={`py-2.5 rounded-xl font-medium border text-center transition-all ${
+                className={`py-2.5 rounded-lg font-bold border text-center transition-all ${
                   role === 'student'
-                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-md'
-                    : 'bg-slate-900 text-slate-400 border-slate-800 hover:bg-slate-800'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                 }`}
               >
                 Student
@@ -214,10 +210,10 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => setRole('teacher')}
-                className={`py-2.5 rounded-xl font-medium border text-center transition-all ${
+                className={`py-2.5 rounded-lg font-bold border text-center transition-all ${
                   role === 'teacher'
-                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-md'
-                    : 'bg-slate-900 text-slate-400 border-slate-800 hover:bg-slate-800'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                 }`}
               >
                 Teacher / Tutor
@@ -228,11 +224,11 @@ export default function RegisterPage() {
           {role === 'student' && (
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="font-semibold text-slate-300 mb-1 block">Language:</label>
+                <label className="font-bold text-slate-700 mb-1 block">Language:</label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value as any)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 focus:outline-none focus:border-blue-600 font-medium"
                 >
                   <option value="English">English</option>
                   <option value="Tamil">Tamil (தமிழ்)</option>
@@ -240,11 +236,11 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="font-semibold text-slate-300 mb-1 block">Learning Level:</label>
+                <label className="font-bold text-slate-700 mb-1 block">Learning Level:</label>
                 <select
                   value={learningLevel}
                   onChange={(e) => setLearningLevel(e.target.value as any)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 focus:outline-none focus:border-blue-600 font-medium"
                 >
                   <option value="Beginner">Beginner</option>
                   <option value="Intermediate">Intermediate</option>
@@ -255,7 +251,7 @@ export default function RegisterPage() {
           )}
 
           <div>
-            <label className="font-semibold text-slate-300 mb-1 block">Password:</label>
+            <label className="font-bold text-slate-700 mb-1 block">Password:</label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
@@ -264,13 +260,13 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="At least 6 characters"
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-blue-600 font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="font-semibold text-slate-300 mb-1 block">Confirm Password:</label>
+            <label className="font-bold text-slate-700 mb-1 block">Confirm Password:</label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
@@ -279,7 +275,7 @@ export default function RegisterPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 placeholder="Re-enter password"
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-blue-600 font-medium"
               />
             </div>
           </div>
@@ -287,16 +283,16 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center space-x-2"
+            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-2xs transition-all flex items-center justify-center space-x-2"
           >
             {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
             <span>Register Account</span>
           </button>
         </form>
 
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-slate-500 font-medium">
           Already have an account?{' '}
-          <Link href="/login" className="text-indigo-400 font-semibold hover:underline">
+          <Link href="/login" className="text-blue-600 font-bold hover:underline">
             Sign in here
           </Link>
         </p>
@@ -304,4 +300,5 @@ export default function RegisterPage() {
     </div>
   );
 }
+
 

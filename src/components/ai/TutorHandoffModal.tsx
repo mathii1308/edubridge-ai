@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { UserCheck, Sparkles, AlertCircle, ArrowRight, X } from 'lucide-react';
+import { UserCheck, AlertCircle, ArrowRight, X } from 'lucide-react';
 
 interface TutorHandoffModalProps {
   isOpen: boolean;
@@ -29,75 +29,70 @@ export const TutorHandoffModal: React.FC<TutorHandoffModalProps> = ({
 
   const handleProceed = () => {
     onClose();
-    // Redirect to Tutor Discovery with pre-filled state query
     router.push(
       `/student/tutors?subject=${encodeURIComponent(subject)}&topic=${encodeURIComponent(topic)}&language=${encodeURIComponent(language)}&requirement=${encodeURIComponent(studentRequirement)}`
     );
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="glass-card max-w-md w-full rounded-3xl p-6 border border-indigo-500/30 relative shadow-2xl animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white max-w-md w-full rounded-xl p-6 border border-slate-200 relative shadow-xl space-y-4">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 rounded-full text-slate-400 hover:text-white hover:bg-slate-800"
+          className="absolute top-4 right-4 p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
-            <AlertCircle className="w-6 h-6" />
+        <div className="flex items-center space-x-3 pb-3 border-b border-slate-100">
+          <div className="w-10 h-10 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+            <AlertCircle className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Struggle Detected — Human Tutor Support</h3>
-            <p className="text-xs text-amber-300">AI identified a key concept gap</p>
+            <h3 className="text-base font-bold text-slate-900">Struggle Flagged — Human Tutor Support</h3>
+            <p className="text-xs text-amber-800 font-semibold">AI identified concept gap</p>
           </div>
         </div>
 
-        <p className="text-sm text-slate-300 mb-5 leading-relaxed">
-          You expressed difficulty grasping <strong className="text-indigo-300">{topic}</strong> in <strong className="text-indigo-300">{subject}</strong>. Learning complex concepts is easier with a dedicated 1-on-1 human educator.
+        <p className="text-xs text-slate-600 leading-relaxed">
+          You expressed difficulty grasping <strong className="text-slate-900">{topic}</strong> in <strong className="text-slate-900">{subject}</strong>. Connect with a human tutor for personalized guidance.
         </p>
 
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5 mb-6 text-xs">
-          <div className="flex justify-between text-slate-400">
+        <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2 text-xs">
+          <div className="flex justify-between text-slate-600 font-medium">
             <span>Subject & Topic:</span>
-            <span className="font-semibold text-slate-200">{subject} — {topic}</span>
+            <span className="font-bold text-slate-900">{subject} — {topic}</span>
           </div>
-          <div className="flex justify-between text-slate-400">
-            <span>Student Requirement:</span>
-            <span className="font-semibold text-amber-300 truncate max-w-[200px]">{studentRequirement}</span>
+          <div className="flex justify-between text-slate-600 font-medium">
+            <span>Requirement:</span>
+            <span className="font-bold text-blue-800 truncate max-w-[180px]">{studentRequirement}</span>
           </div>
-          <div className="flex justify-between text-slate-400">
-            <span>Preferred Language:</span>
-            <span className="font-semibold text-indigo-300">{language}</span>
+          <div className="flex justify-between text-slate-600 font-medium">
+            <span>Language:</span>
+            <span className="font-bold text-slate-900">{language}</span>
           </div>
-          <div className="flex justify-between text-slate-400">
-            <span>Learning Pace:</span>
-            <span className="font-semibold text-slate-200">{learningLevel}</span>
-          </div>
-          <div className="flex justify-between text-slate-400">
-            <span>Real-time Status:</span>
-            <span className="font-semibold text-emerald-400 flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Available Tutors Found
+          <div className="flex justify-between text-slate-600 font-medium">
+            <span>Status:</span>
+            <span className="font-bold text-emerald-700 flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-600"></span> Available Tutors Found
             </span>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 pt-2">
           <button
             onClick={onClose}
-            className="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-all"
+            className="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200"
           >
-            Try AI Again
+            Continue with AI
           </button>
 
           <button
             onClick={handleProceed}
-            className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-semibold flex items-center justify-center space-x-2 shadow-lg shadow-indigo-500/25 transition-all"
+            className="flex-1 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center justify-center space-x-1.5 shadow-2xs"
           >
             <UserCheck className="w-4 h-4" />
-            <span>Connect with Tutor</span>
+            <span>Find Tutor</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -105,4 +100,5 @@ export const TutorHandoffModal: React.FC<TutorHandoffModalProps> = ({
     </div>
   );
 };
+
 

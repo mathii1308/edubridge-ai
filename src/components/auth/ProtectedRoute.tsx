@@ -30,20 +30,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#090d16] flex flex-col items-center justify-center space-y-4 text-slate-100">
-        <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-        <p className="text-xs text-slate-400 font-medium">Verifying Session Security...</p>
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center space-y-4 text-slate-900">
+        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+        <p className="text-xs text-slate-500 font-semibold">Verifying Session Security...</p>
       </div>
     );
   }
 
   if (!user) {
-    return null; // Will redirect via useEffect
+    return null;
   }
 
   if (allowedRoles && role && !allowedRoles.includes(role)) {
-    return null; // Will redirect via useEffect
+    return null;
   }
 
   return <>{children}</>;
 };
+

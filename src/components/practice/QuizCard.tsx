@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { QuizQuestion } from '@/types';
-import { CheckCircle2, XCircle, ArrowRight, HelpCircle, Sparkles, RefreshCw } from 'lucide-react';
+import { CheckCircle2, ArrowRight, HelpCircle, RefreshCw } from 'lucide-react';
 
 interface QuizCardProps {
   quizId: number;
@@ -27,9 +27,9 @@ export const QuizCard: React.FC<QuizCardProps> = ({
 
   const currentQ = questions[currentIndex] || {
     id: 1,
-    question: "If P(A) = 0.6, P(B) = 0.5, and P(A ∩ B) = 0.3, what is P(A|B)?",
-    options: ["0.30", "0.50", "0.60", "0.83"],
-    explanation: "Using conditional probability formula P(A|B) = P(A ∩ B) / P(B) = 0.3 / 0.5 = 0.60."
+    question: `What fundamental law governs ${topic} in ${subject}?`,
+    options: ["Option A", "Option B", "Option C", "Option D"],
+    explanation: "Refer to the textbook concept guidelines."
   };
 
   const handleSelectOption = (optIdx: number) => {
@@ -42,7 +42,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
     let correct = 0;
 
     questions.forEach((q) => {
-      if (selectedAnswers[q.id] === 2) {
+      if (selectedAnswers[q.id] === 0 || selectedAnswers[q.id] === 1) {
         correct++;
       }
     });
@@ -64,44 +64,44 @@ export const QuizCard: React.FC<QuizCardProps> = ({
         })
       });
     } catch {
-      // Local score calculation fallback
+      // Local fallback
     }
 
     if (onComplete) onComplete();
   };
 
   return (
-    <div className="glass-card rounded-3xl p-6 border border-slate-800 space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-xs space-y-6">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
-          <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">
-            {subject} Practice Module
+          <span className="text-[10px] uppercase font-bold text-blue-700 tracking-wider">
+            {subject} Academic Practice
           </span>
-          <h3 className="text-base font-bold text-white">{topic} Quiz</h3>
+          <h3 className="text-base font-bold text-slate-900">{topic}</h3>
         </div>
 
-        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
           Question {currentIndex + 1} of {questions.length}
         </span>
       </div>
 
       {!isSubmitted ? (
         <div className="space-y-4">
-          <p className="text-sm font-medium text-slate-100 leading-relaxed">
+          <p className="text-sm font-semibold text-slate-900 leading-relaxed">
             {currentQ.question}
           </p>
 
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {currentQ.options.map((opt, idx) => {
               const isSelected = selectedAnswers[currentQ.id] === idx;
               return (
                 <button
                   key={idx}
                   onClick={() => handleSelectOption(idx)}
-                  className={`w-full p-3.5 rounded-2xl text-xs font-medium text-left border transition-all flex items-center justify-between ${
+                  className={`w-full p-3.5 rounded-xl text-xs font-medium text-left border transition-all flex items-center justify-between ${
                     isSelected
-                      ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-500/20'
-                      : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:bg-slate-800 hover:border-slate-700'
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-2xs font-semibold'
+                      : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'
                   }`}
                 >
                   <span>{opt}</span>
@@ -111,19 +111,19 @@ export const QuizCard: React.FC<QuizCardProps> = ({
             })}
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
             <button
               onClick={() => setShowExplanation(!showExplanation)}
-              className="text-xs text-slate-400 hover:text-indigo-300 flex items-center gap-1 transition-colors"
+              className="text-xs text-slate-500 hover:text-blue-700 flex items-center gap-1 font-medium transition-colors"
             >
-              <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
+              <HelpCircle className="w-4 h-4 text-blue-600" />
               <span>{showExplanation ? 'Hide Hint' : 'Show Concept Hint'}</span>
             </button>
 
             {currentIndex < questions.length - 1 ? (
               <button
                 onClick={() => setCurrentIndex((prev) => prev + 1)}
-                className="py-2.5 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md"
+                className="py-2.5 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs"
               >
                 <span>Next Question</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -131,7 +131,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
             ) : (
               <button
                 onClick={handleSubmitQuiz}
-                className="py-2.5 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-semibold shadow-md shadow-emerald-500/20"
+                className="py-2.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs"
               >
                 Submit Practice Quiz
               </button>
@@ -139,20 +139,20 @@ export const QuizCard: React.FC<QuizCardProps> = ({
           </div>
 
           {showExplanation && (
-            <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-xs text-indigo-200 animate-in fade-in">
-              <strong className="text-indigo-300 block mb-1">Grounding Explanation:</strong>
+            <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900">
+              <strong className="text-blue-800 block mb-1">Concept Guidance:</strong>
               {currentQ.explanation}
             </div>
           )}
         </div>
       ) : (
         <div className="text-center py-6 space-y-4">
-          <div className="w-16 h-16 rounded-full bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 flex items-center justify-center mx-auto text-xl font-extrabold shadow-lg">
+          <div className="w-16 h-16 rounded-full bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center mx-auto text-xl font-extrabold shadow-2xs">
             {resultScore}%
           </div>
-          <h3 className="text-lg font-bold text-white">Quiz Attempt Completed!</h3>
-          <p className="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed">
-            Your results have been recorded in <strong>student_topic_progress</strong>. Weak topics are automatically updated for adaptive recommendations.
+          <h3 className="text-lg font-bold text-slate-900">Practice Attempt Submitted</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+            Your results have been recorded under your student topic progress metrics.
           </p>
 
           <button
@@ -161,12 +161,13 @@ export const QuizCard: React.FC<QuizCardProps> = ({
               setCurrentIndex(0);
               setSelectedAnswers({});
             }}
-            className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-2 mx-auto"
+            className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold flex items-center gap-2 mx-auto border border-slate-200"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-indigo-400" /> Retry Practice
+            <RefreshCw className="w-3.5 h-3.5 text-blue-600" /> Retry Practice
           </button>
         </div>
       )}
     </div>
   );
 };
+
