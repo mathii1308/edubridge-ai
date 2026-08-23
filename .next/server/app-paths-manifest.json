@@ -1,8 +1,11 @@
 {
-  "/page": "app/page.js",
-  "/login/page": "app/login/page.js",
-  "/student/dashboard/page": "app/student/dashboard/page.js",
-  "/student/ai-tutor/page": "app/student/ai-tutor/page.js",
+  "/admin/scholarships/page": "app/admin/scholarships/page.js",
+  "/admin/resources/page": "app/admin/resources/page.js",
+  "/admin/users/page": "app/admin/users/page.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/teacher/availability/page": "app/teacher/availability/page.js",
+  "/teacher/bookings/page": "app/teacher/bookings/page.js",
   "/teacher/dashboard/page": "app/teacher/dashboard/page.js",
-  "/teacher/students/page": "app/teacher/students/page.js"
+  "/teacher/students/page": "app/teacher/students/page.js",
+  "/teacher/profile/page": "app/teacher/profile/page.js"
 }

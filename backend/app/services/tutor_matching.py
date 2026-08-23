@@ -76,7 +76,6 @@ class TutorMatchingService:
         final_score = min(100.0, round(score, 1))
 
         return {
-            "id": tutor.id,
             "tutor_id": tutor.id,
             "user_id": tutor.user_id,
             "name": tutor.user.name if tutor.user else "Tutor",

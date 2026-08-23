@@ -38,7 +38,6 @@ def discover_tutors(
             )
         else:
             match_data = {
-                "id": tutor.id,
                 "tutor_id": tutor.id,
                 "user_id": tutor.user_id,
                 "name": tutor.user.name if tutor.user else "Tutor",

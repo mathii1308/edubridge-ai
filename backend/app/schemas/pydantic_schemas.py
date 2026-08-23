@@ -1,18 +1,18 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import List, Optional, Any
 from datetime import datetime
 
 # Auth Schemas
 class UserRegister(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     password: str
     role: str  # student, teacher, admin
     preferred_language: Optional[str] = "English"
     learning_level: Optional[str] = "Intermediate"
 
 class UserLogin(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 class UserResponse(BaseModel):
@@ -20,8 +20,6 @@ class UserResponse(BaseModel):
     name: str
     email: str
     role: str
-    email_verified: bool = False
-    account_status: str = "active"
     created_at: datetime
     class Config:
         from_attributes = True
@@ -64,9 +62,6 @@ class AIChatRequest(BaseModel):
     subject: Optional[str] = None
     topic: Optional[str] = None
     action_type: Optional[str] = "explain"  # explain, simplify, example, step_by_step, test, struggle
-    reference_text: Optional[str] = None
-    reference_title: Optional[str] = None
-
 
 class CitationSchema(BaseModel):
     title: str
@@ -116,7 +111,6 @@ class BookingCreate(BaseModel):
     scheduled_date: str
     start_time: str
     end_time: str
-    student_requirement: Optional[str] = None
 
 class BookingResponse(BaseModel):
     id: int
@@ -129,24 +123,8 @@ class BookingResponse(BaseModel):
     scheduled_date: str
     start_time: str
     end_time: str
-    student_requirement: Optional[str] = None
     status: str
     created_at: datetime
-    class Config:
-        from_attributes = True
-
-class BookingMessageCreate(BaseModel):
-    message: str
-
-class BookingMessageResponse(BaseModel):
-    id: int
-    booking_id: int
-    sender_id: int
-    sender_name: Optional[str] = None
-    sender_role: str
-    message: str
-    created_at: datetime
-    read: bool
     class Config:
         from_attributes = True
 

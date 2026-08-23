@@ -25,48 +25,6 @@ Never claim scholarship eligibility unless verified scholarship rules support th
 
 class AIService:
     @staticmethod
-    def analyze_requirement(message: str) -> Dict:
-        msg_lower = message.lower()
-        
-        subject = "Mathematics"
-        topic = "General Concept"
-        difficulty = "Medium"
-        requirement = "Concept explanation and step-by-step guidance"
-
-        if "dbms" in msg_lower or "database" in msg_lower or "normaliz" in msg_lower or "2nf" in msg_lower or "3nf" in msg_lower or "bcnf" in msg_lower or "sql" in msg_lower or "table" in msg_lower or "primary key" in msg_lower:
-            subject = "DBMS"
-            topic = "Database Management & Normalization"
-            if "2nf" in msg_lower or "3nf" in msg_lower or "normaliz" in msg_lower:
-                difficulty = "2NF / 3NF Normal Forms"
-                requirement = "Needs clear explanation of Database Normalization (1NF, 2NF, 3NF, BCNF) and functional dependencies"
-            else:
-                difficulty = "Relational Model & SQL"
-                requirement = "Concept breakdown of relational databases, primary keys, and query optimization"
-        elif "physics" in msg_lower or "optics" in msg_lower or "wave" in msg_lower or "light" in msg_lower or "lens" in msg_lower or "thermodynam" in msg_lower or "mechanics" in msg_lower:
-            subject = "Physics"
-            topic = "Wave Optics & Thermodynamics"
-            difficulty = "Interference & Wavefronts"
-            requirement = "Derivation & Huygens principle explanation"
-        elif "chemistry" in msg_lower or "organic" in msg_lower or "reaction" in msg_lower or "bonding" in msg_lower:
-            subject = "Chemistry"
-            topic = "Organic Chemistry & Bonding"
-            difficulty = "Reaction Mechanisms"
-            requirement = "Step-by-step reaction mechanism breakdown"
-        elif "probability" in msg_lower or "bayes" in msg_lower or "calculus" in msg_lower or "math" in msg_lower or "algebra" in msg_lower:
-            subject = "Mathematics"
-            topic = "Calculus & Probability"
-            difficulty = "Conditional Probability & Integrals"
-            requirement = "Formula application and step-by-step proofs"
-
-        return {
-            "subject": subject,
-            "topic": topic,
-            "difficulty": difficulty,
-            "student_requirement": requirement,
-            "type_of_help": "Human tutoring if AI assistance is insufficient"
-        }
-
-    @staticmethod
     def generate_tutor_response(
         db: Session,
         message: str,
@@ -74,120 +32,119 @@ class AIService:
         learning_level: str = "Intermediate",
         subject: Optional[str] = None,
         topic: Optional[str] = None,
-        action_type: str = "explain",
-        reference_text: Optional[str] = None,
-        reference_title: Optional[str] = None
+        action_type: str = "explain"
     ) -> Dict:
+        """
+        Generates grounded, step-by-step AI Tutor responses with citations and understanding checks.
+        Handles English & Tamil queries.
+        """
+        # Step 1: Topic & Subject Detection
         msg_lower = message.lower()
-        analysis = AIService.analyze_requirement(message)
+        detected_subject = subject or "Mathematics"
+        if "physics" in msg_lower or "optics" in msg_lower or "wave" in msg_lower or "light" in msg_lower:
+            detected_subject = "Physics"
+        elif "chemistry" in msg_lower or "organic" in msg_lower or "thermodynamics" in msg_lower:
+            detected_subject = "Chemistry"
 
-        # Override default 'Mathematics' or generic subject if the user's message explicitly references another subject
-        if subject == "Mathematics" and analysis["subject"] != "Mathematics":
-            detected_subject = analysis["subject"]
-            detected_topic = analysis["topic"]
-        else:
-            detected_subject = subject or analysis["subject"]
-            detected_topic = topic or analysis["topic"]
+        detected_topic = topic or "Probability"
+        if "probability" in msg_lower or "conditional" in msg_lower or "bayes" in msg_lower or "நிகழ்தகவு" in msg_lower:
+            detected_topic = "Probability"
+        elif "trigonometry" in msg_lower or "sine" in msg_lower or "cosine" in msg_lower:
+            detected_topic = "Trigonometry"
+        elif "optics" in msg_lower or "wave" in msg_lower:
+            detected_topic = "Wave Optics & Light"
+        elif "organic" in msg_lower:
+            detected_topic = "Organic Reaction Mechanisms"
 
-        difficulty = analysis["difficulty"]
-
+        # Step 2: Retrieve Grounded Context via RAG
+        rag_chunks = RAGService.retrieve_context(db, query=message, language=language, subject=detected_subject)
         citations = []
-        context_prefix = ""
+        context_str = ""
 
-        # Handle Reference Material Context if provided
-        if reference_text and reference_text.strip():
-            ref_name = reference_title or "Uploaded Reference Material"
-            context_prefix = f"📌 **Answer grounded on student reference context ({ref_name}):**\n\n"
+        for chunk in rag_chunks:
+            context_str += f"\n- {chunk['title']}: {chunk['content']}"
             citations.append({
-                "title": f"Student Reference Context: {ref_name}",
-                "source_name": "Provided Reference Material",
-                "source_url": "#reference",
-                "snippet": reference_text[:140] + "..."
+                "title": chunk['title'],
+                "source_name": chunk['source_name'],
+                "source_url": chunk['source_url'],
+                "snippet": chunk['content'][:140] + "..."
             })
-        else:
-            # Retrieve Grounded Context via RAG
-            rag_chunks = RAGService.retrieve_context(db, query=message, language=language, subject=detected_subject)
-            for chunk in rag_chunks:
-                citations.append({
-                    "title": chunk['title'],
-                    "source_name": chunk['source_name'],
-                    "source_url": chunk['source_url'],
-                    "snippet": chunk['content'][:140] + "..."
-                })
 
+        # Step 3: Action-Specific Logic & Multilingual Output Generation
         needs_tutor = False
         learning_gap = None
+        difficulty = "Medium"
 
         if action_type == "struggle" or "still don't understand" in msg_lower or "புரிந்துகொள்ளவில்லை" in msg_lower:
             needs_tutor = True
-            learning_gap = f"Persistent struggle applying core principles of {detected_topic} ({difficulty})."
+            learning_gap = f"Persistent struggle applying core principles of {detected_topic}."
             if language == "Tamil":
                 reply = (
-                    f"**மன்னிக்கவும், இந்த கருத்து ({detected_topic}) உங்களுக்கு இன்னும் சவாலாக உள்ளது போல் தெரிகிறது.**\n\n"
-                    f"ஒரு தனிப்பட்ட மனித ஆசிரியர் (Human Tutor) உங்களுக்கு உடனடியாக உதவ முடியும்.\n\n"
-                    f"**பாடப்பகுதி:** {detected_topic} — {detected_subject}\n"
-                    f"நேரலை ஆசிரியருடன் இணைந்து பாடத்தை கற்க விரும்புகிறீர்களா?"
+                    f"**மன்னிக்கவும், இந்த கருத்து உங்களுக்கு இன்னும் சவாலாக உள்ளது போல் தெரிகிறது.**\n\n"
+                    f"நாங்கள் மீண்டும் வேறு வழியில் விளக்க முயன்றோம். ஆனால் ஆழமான புரிதலுக்கு ஒரு தனிப்பட்ட மனித ஆசிரியர் (Human Tutor) உங்களுக்கு உடனடியாக உதவ முடியும்.\n\n"
+                    f"**நாங்கள் கண்டறிந்த பகுதி:** {detected_topic} ({detected_subject})\n"
+                    f"நேரலை ஆசிரியருடன் இணைந்து பாடத்தை எளிதாக கற்க விரும்புகிறீர்களா?"
                 )
             else:
                 reply = (
-                    f"**I understand this concept is tricky!** Mastering {detected_topic} takes dedicated step-by-step guidance.\n\n"
-                    f"Connecting with a human tutor for **{detected_topic} ({detected_subject})** can provide personalized, real-time feedback.\n\n"
+                    f"**I understand this concept is still tricky!** Don't worry, learning takes time.\n\n"
+                    f"Since this is a core topic in **{detected_topic} ({detected_subject})**, connecting with a dedicated human tutor can provide real-time step-by-step guidance tailored to your pace.\n\n"
                     f"Would you like me to match you with an available tutor right now?"
                 )
-        elif reference_text and reference_text.strip():
-            reply = (
-                f"{context_prefix}"
-                f"Based on your reference text for **{detected_subject} ({detected_topic})**:\n\n"
-                f"1. **Core Concept:** The excerpt discusses fundamental rules for {detected_topic}.\n"
-                f"2. **Application to '{message}':** Following the provided reference text, analyze key parameters step-by-step and verify constraints.\n"
-                f"3. **Summary:** All conditions match the constraints in your reference document.\n\n"
-                f"Would you like a simplified explanation or a practical example based on this text?"
-            )
+        elif action_type == "simplify":
+            if language == "Tamil":
+                reply = (
+                    f"**எளிய முறையில் விளக்கம் ({detected_topic}):**\n\n"
+                    f"சார்பு நிகழ்தகவு என்பதை ஒரு நிபந்தனை என நினைக்கலாம். உதாரணமாக, மழை பெய்யும்போது குடை கொண்டு செல்வது.\n\n"
+                    f"1. முதல் நிகழ்ச்சி நடந்த பிறகுதான் இரண்டாம் நிகழ்ச்சி நடக்கும்.\n"
+                    f"2. சூத்திரம்: P(A|B) = P(A ∩ B) / P(B).\n\n"
+                    f"**மூலம்:** {citations[0]['title'] if citations else 'Tamil Nadu Educational Textbook'}\n\n"
+                    f"**புரிந்துகொண்டீர்களா?** கீழே உள்ள பயிற்சி கேள்வியை முயற்சிக்கவும்."
+                )
+            else:
+                reply = (
+                    f"**Let's simplify {detected_topic} for {learning_level} level:**\n\n"
+                    f"Imagine conditional probability as looking at a smaller group of possibilities instead of everything.\n\n"
+                    f"• **Step 1:** Focus only on event B occurring (your new total universe).\n"
+                    f"• **Step 2:** Find how much of event A happens inside event B.\n"
+                    f"• **Formula:** P(A|B) = P(A ∩ B) / P(B).\n\n"
+                    f"**Real-world Analogy:** What is the probability that a student wears glasses, given that they are in the Science stream?"
+                )
+        elif action_type == "example":
+            if language == "Tamil":
+                reply = (
+                    f"**நடைமுறை உதாரணம் ({detected_topic}):**\n\n"
+                    f"ஒரு பையில் 4 சிவப்பு பந்துகளும் 6 நீல பந்துகளும் உள்ளன. நீங்கள் முதல் பந்தை எடுக்கும்போது சிவப்பு பந்து கிடைக்க நிகழ்தகவு 4/10 ஆகும்.\n\n"
+                    f"முதல் பந்தை வெளியே வைத்துவிட்டு, இரண்டாம் பந்தை எடுக்கும்போது மீதம் 9 பந்துகள் மட்டுமே இருக்கும். இதுவே சார்பு நிகழ்தகவு ஆகும்!"
+                )
+            else:
+                reply = (
+                    f"**Real-World Example for {detected_topic}:**\n\n"
+                    f"Imagine a bag with 4 Red balls and 6 Blue balls. You draw one ball, keep it outside, and draw a second ball.\n\n"
+                    f"• **First draw:** P(Red) = 4 / 10\n"
+                    f"• **Second draw (given 1st was Red):** P(Red | 1st Red) = 3 / 9\n\n"
+                    f"Notice how the second probability changed because of what happened first! That's conditional probability in action."
+                )
         else:
-            # Rich Subject-Specific Explanations
-            if detected_subject == "DBMS":
+            if language == "Tamil":
                 reply = (
-                    f"**EduBridge AI Step-by-Step Explanation ({detected_subject} — {detected_topic}):**\n\n"
-                    f"Here is the detailed academic breakdown for **DBMS Concepts**:\n\n"
-                    f"1. **Database & Schema:** A Relational Database Management System (RDBMS) organizes data into structured tables (relations) consisting of rows (tuples) and columns (attributes).\n\n"
-                    f"2. **Core Concepts:**\n"
-                    f"   - **Keys:** *Primary Key* uniquely identifies each row; *Foreign Key* enforces referential integrity across tables.\n"
-                    f"   - **Normalization:** Process of reducing data redundancy and preventing insert/update/delete anomalies.\n"
-                    f"     • **1NF:** Atomic attribute values (no repeating groups).\n"
-                    f"     • **2NF:** 1NF + Elimination of Partial Functional Dependencies.\n"
-                    f"     • **3NF:** 2NF + Elimination of Transitive Functional Dependencies ($X \\to Y, Y \\to Z$).\n"
-                    f"     • **BCNF:** Boyce-Codd Normal Form (Every determinant $X$ must be a super key).\n"
-                    f"   - **ACID Properties:** Atomicity, Consistency, Isolation, and Durability guarantees transaction reliability.\n\n"
-                    f"3. **Next Steps:** Would you like a worked normalization problem (1NF to 3NF) or a practice quiz question on DBMS?"
-                )
-            elif detected_subject == "Physics":
-                reply = (
-                    f"**EduBridge AI Step-by-Step Explanation ({detected_subject} — {detected_topic}):**\n\n"
-                    f"Here is the detailed physics explanation for **{detected_topic}**:\n\n"
-                    f"1. **Huygens Principle:** Every point on a primary wavefront acts as a source of secondary wavelets radiating in all directions at the speed of light.\n"
-                    f"2. **Interference & Superposition:**\n"
-                    f"   - *Constructive Interference:* Path difference $\\Delta x = n\\lambda$, Phase difference $\\phi = 2n\\pi$.\n"
-                    f"   - *Destructive Interference:* Path difference $\\Delta x = (2n+1)\\frac{{\\lambda}}{{2}}$, Phase difference $\\phi = (2n+1)\\pi$.\n"
-                    f"3. **Fringe Width Formula:** $\\beta = \\frac{{\\lambda D}}{{d}}$, where $D$ is screen distance and $d$ is slit separation.\n\n"
-                    f"Would you like a sample numerical problem on Young's Double Slit Experiment?"
-                )
-            elif detected_subject == "Chemistry":
-                reply = (
-                    f"**EduBridge AI Step-by-Step Explanation ({detected_subject} — {detected_topic}):**\n\n"
-                    f"Here is the chemical analysis for **{detected_topic}**:\n\n"
-                    f"1. **Reaction Mechanism:** Electrophilic and nucleophilic attacks govern organic transformations.\n"
-                    f"2. **Carbocation Stability:** $3^\\circ > 2^\\circ > 1^\\circ$ due to inductive effects and hyperconjugation.\n"
-                    f"3. **Thermodynamic vs Kinetic Control:** Low temperatures favor kinetic products; higher temperatures yield thermodynamically stable products.\n\n"
-                    f"Would you like a step-by-step mechanism breakdown for an electrophilic addition reaction?"
+                    f"**EduBridge AI கற்றல் வழிகாட்டி ({detected_subject} - {detected_topic}):**\n\n"
+                    f"உங்கள் கேள்விக்கான grounded கல்வி மூல விளக்கம்:\n\n"
+                    f"{context_str if context_str else 'நிகழ்தகவு மற்றும் கணிதக் கோட்பாடுகள் பற்றிய விரிவான விளக்கம்.'}\n\n"
+                    f"**படி 1:** கொடுக்கப்பட்ட தரவுகளை அடையாளம் காணவும்.\n"
+                    f"**படி 2:** சூத்திரத்தைப் பயன்படுத்தவும்: P(A|B) = P(A ∩ B) / P(B).\n"
+                    f"**படி 3:** முடிவைச் சரிபார்க்கவும்."
                 )
             else:
                 reply = (
                     f"**EduBridge AI Step-by-Step Explanation ({detected_subject} — {detected_topic}):**\n\n"
-                    f"Here is the detailed academic breakdown for your doubt regarding **'{message}'**:\n\n"
-                    f"1. **Concept Definition:** Core theoretical principles governing **{detected_topic}** under **{detected_subject}**.\n"
-                    f"2. **Methodology:** State initial conditions, set up governing equations, and solve systematically step-by-step.\n"
-                    f"3. **Verification:** Validate results against boundary conditions and expected dimensional units.\n\n"
-                    f"Would you like a simplified explanation or a practical real-world example?"
+                    f"Here is the breakdown based on verified open educational materials:\n\n"
+                    f"{context_str if context_str else 'Conditional probability measures the likelihood of an event occurring given that another event has already occurred.'}\n\n"
+                    f"**Core Steps to Solve:**\n"
+                    f"1. Identify the given prior condition P(B).\n"
+                    f"2. Identify the joint probability P(A ∩ B).\n"
+                    f"3. Divide P(A ∩ B) by P(B) to find P(A|B).\n\n"
+                    f"**Quick Check:** Would you like to try a practice problem, or do you need a simpler explanation?"
                 )
 
         return {
@@ -196,10 +153,7 @@ class AIService:
             "topic": detected_topic,
             "difficulty": difficulty,
             "learning_gap": learning_gap,
-            "confidence": 0.96,
+            "confidence": 0.92,
             "needs_tutor": needs_tutor,
             "citations": citations
         }
-
-
-

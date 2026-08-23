@@ -35,9 +35,6 @@ class User(Base):
     email = Column(String(120), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     role = Column(String(20), nullable=False)  # student, teacher, admin
-    email_verified = Column(Boolean, default=False)
-    account_status = Column(String(20), default="active")  # active, unverified
-    verification_token = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     student_profile = relationship("StudentProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
@@ -142,28 +139,11 @@ class TutorBooking(Base):
     scheduled_date = Column(String(10), nullable=False)
     start_time = Column(String(8), nullable=False)
     end_time = Column(String(8), nullable=False)
-    student_requirement = Column(Text, nullable=True)
     status = Column(String(20), default="requested")  # requested, accepted, rejected, cancelled, completed
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     student = relationship("StudentProfile", back_populates="bookings")
     teacher = relationship("TeacherProfile", back_populates="bookings")
-    messages = relationship("BookingMessage", back_populates="booking", cascade="all, delete-orphan")
-
-
-class BookingMessage(Base):
-    __tablename__ = 'booking_messages'
-
-    id = Column(Integer, primary_key=True, index=True)
-    booking_id = Column(Integer, ForeignKey('tutor_bookings.id', ondelete="CASCADE"), nullable=False)
-    sender_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
-    sender_role = Column(String(20), nullable=False)  # student, teacher
-    message = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    read = Column(Boolean, default=False)
-
-    booking = relationship("TutorBooking", back_populates="messages")
-    sender = relationship("User")
 
 
 class EducationalResource(Base):
