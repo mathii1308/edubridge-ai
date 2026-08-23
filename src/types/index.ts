@@ -27,7 +27,7 @@ export interface Citation {
   title: string;
   source_name: string;
   source_url: string;
-  snippet: string;
+  snippet?: string;
 }
 
 export interface ChatMessage {

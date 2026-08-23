@@ -48,7 +48,13 @@ function AdminUsersContent() {
       await fetch(`http://localhost:8000/admin/users/${userToDelete.id}`, { method: 'DELETE' });
     } catch {}
 
-    setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
+    setUsers(prev => {
+      const updated = prev.filter(u => u.id !== userToDelete.id);
+      try {
+        localStorage.setItem('edubridge_users', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
     setUserToDelete(null);
   };
 

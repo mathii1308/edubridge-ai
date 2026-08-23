@@ -10,20 +10,15 @@ function LoginContent() {
   const router = useRouter();
   const { login } = useAuth();
   const [selectedRole, setSelectedRole] = useState<'student' | 'teacher' | 'admin'>('student');
-  const [email, setEmail] = useState('student@edubridge.ai');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleRoleSelect = (role: 'student' | 'teacher' | 'admin') => {
     setSelectedRole(role);
-    if (role === 'student') {
-      setEmail('student@edubridge.ai');
-    } else if (role === 'teacher') {
-      setEmail('tutor.rajesh@edubridge.ai');
-    } else if (role === 'admin') {
-      setEmail('admin@edubridge.ai');
-    }
+    setEmail('');
+    setPassword('');
   };
 
   const redirectByRole = (userRole: string) => {

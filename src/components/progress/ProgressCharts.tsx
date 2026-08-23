@@ -29,33 +29,21 @@ interface ProgressChartsProps {
   weakTopics?: any[];
 }
 
-export const ProgressCharts: React.FC<ProgressChartsProps> = ({
-  historyTrend = [
-    { week: 'Week 1', Mathematics: 60, Physics: 70, Chemistry: 55 },
-    { week: 'Week 2', Mathematics: 65, Physics: 75, Chemistry: 60 },
-    { week: 'Week 3', Mathematics: 72, Physics: 80, Chemistry: 62 },
-    { week: 'Week 4', Mathematics: 78, Physics: 85, Chemistry: 65 },
-  ],
-  subjectScores = [
-    { subject: 'Mathematics', score: 78 },
-    { subject: 'Physics', score: 85 },
-    { subject: 'Chemistry', score: 65 },
-  ],
-  weakTopics = [
-    { topic: 'Database Normalization (2NF & 3NF)', score: 42, subject: 'Computer Science / DBMS' },
-    { topic: 'Probability & Bayes Theorem', score: 55, subject: 'Mathematics' },
-  ],
-}) => {
+export const ProgressCharts: React.FC<ProgressChartsProps> = () => {
   const [notes, setNotes] = useState<NoteItem[]>([]);
+  const [realHistory, setRealHistory] = useState<any[]>([]);
+  const [realSubjectScores, setRealSubjectScores] = useState<any[]>([]);
+  const [realWeakTopics, setRealWeakTopics] = useState<any[]>([]);
+  
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
   
-  const [targetTopic, setTargetTopic] = useState('Database Normalization (2NF & 3NF)');
-  const [targetSubject, setTargetSubject] = useState('Computer Science / DBMS');
+  const [targetTopic, setTargetTopic] = useState('General Concept');
+  const [targetSubject, setTargetSubject] = useState('Mathematics');
   const [noteContent, setNoteContent] = useState('');
 
-  // Fetch notes from API or LocalStorage
-  const fetchNotes = async () => {
+  // Fetch notes & real activity from LocalStorage
+  const fetchNotesAndActivity = async () => {
     try {
       const res = await fetch('http://localhost:8000/progress/notes?student_id=1');
       if (res.ok) {
@@ -63,16 +51,51 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({
         setNotes(data);
       }
     } catch {
-      // Local storage fallback
       const saved = localStorage.getItem('learning_gap_notes');
       if (saved) {
         try { setNotes(JSON.parse(saved)); } catch (e) {}
       }
     }
+
+    // Load real quiz history
+    try {
+      const historySaved = localStorage.getItem('quiz_history_default');
+      if (historySaved) {
+        const historyArr = JSON.parse(historySaved);
+        if (historyArr && historyArr.length > 0) {
+          // Group by subject
+          const subjMap: Record<string, { totalPct: number; count: number }> = {};
+          historyArr.forEach((q: any) => {
+            if (!subjMap[q.subject]) subjMap[q.subject] = { totalPct: 0, count: 0 };
+            subjMap[q.subject].totalPct += q.scorePct;
+            subjMap[q.subject].count += 1;
+          });
+
+          const scores = Object.keys(subjMap).map(subj => ({
+            subject: subj,
+            score: Math.round(subjMap[subj].totalPct / subjMap[subj].count)
+          }));
+          setRealSubjectScores(scores);
+
+          // Build trend
+          const trend = historyArr.slice(-5).map((q: any, i: number) => ({
+            week: `Attempt ${i + 1}`,
+            [q.subject]: q.scorePct
+          }));
+          setRealHistory(trend);
+        }
+      }
+
+      const weakSaved = localStorage.getItem('learning_gaps_default');
+      if (weakSaved) {
+        const weakArr = JSON.parse(weakSaved);
+        setRealWeakTopics(weakArr);
+      }
+    } catch (e) {}
   };
 
   useEffect(() => {
-    fetchNotes();
+    fetchNotesAndActivity();
   }, []);
 
   const saveLocalNotes = (updated: NoteItem[]) => {
@@ -159,25 +182,31 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({
           </div>
 
           <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={historyTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="week" stroke="#64748b" fontSize={11} />
-                <YAxis stroke="#64748b" fontSize={11} domain={[0, 100]} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#ffffff',
-                    borderColor: '#cbd5e1',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    color: '#0f172a'
-                  }}
-                />
-                <Line type="monotone" dataKey="Mathematics" stroke="#2563eb" strokeWidth={2.5} dot={{ r: 4 }} />
-                <Line type="monotone" dataKey="Physics" stroke="#059669" strokeWidth={2.5} dot={{ r: 4 }} />
-                <Line type="monotone" dataKey="Chemistry" stroke="#d97706" strokeWidth={2.5} dot={{ r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
+            {realHistory.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={realHistory}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="week" stroke="#64748b" fontSize={11} />
+                  <YAxis stroke="#64748b" fontSize={11} domain={[0, 100]} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      borderColor: '#cbd5e1',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      color: '#0f172a'
+                    }}
+                  />
+                  <Line type="monotone" dataKey="Physics" stroke="#2563eb" strokeWidth={2.5} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="Mathematics" stroke="#059669" strokeWidth={2.5} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="Computer Science / DBMS" stroke="#d97706" strokeWidth={2.5} dot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200 p-4 text-center">
+                No quiz progress recorded yet. Practice concepts in subjects to render accuracy trend graphs.
+              </div>
+            )}
           </div>
         </div>
 
@@ -192,22 +221,28 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({
           </div>
 
           <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={subjectScores}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="subject" stroke="#64748b" fontSize={11} />
-                <YAxis stroke="#64748b" fontSize={11} domain={[0, 100]} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#ffffff',
-                    borderColor: '#cbd5e1',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                  }}
-                />
-                <Bar dataKey="score" fill="#2563eb" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {realSubjectScores.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={realSubjectScores}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="subject" stroke="#64748b" fontSize={11} />
+                  <YAxis stroke="#64748b" fontSize={11} domain={[0, 100]} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      borderColor: '#cbd5e1',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                    }}
+                  />
+                  <Bar dataKey="score" fill="#2563eb" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200 p-4 text-center">
+                No subject mastery data yet. Take practice quizzes to evaluate subject scores.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -220,7 +255,7 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({
             <h3 className="text-sm font-bold text-slate-900">Identified Learning Gaps & Action Notes</h3>
           </div>
           <button
-            onClick={() => handleOpenAddModal(weakTopics[0]?.topic || 'Database Normalization', weakTopics[0]?.subject || 'DBMS')}
+            onClick={() => handleOpenAddModal(realWeakTopics[0]?.topic || 'General Weak Concept', realWeakTopics[0]?.subject || 'Mathematics')}
             className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1 shadow-2xs"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -228,37 +263,41 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {weakTopics.map((item, idx) => {
-            const topicNotes = notes.filter(n => n.topic_name === item.topic || n.subject_name === item.subject);
-            return (
-              <div key={idx} className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <span className="text-[10px] text-slate-500 block uppercase font-bold">{item.subject}</span>
-                    <h4 className="text-sm font-bold text-slate-900">{item.topic}</h4>
-                    <p className="text-xs font-semibold text-rose-600 mt-0.5">Accuracy: {item.score}% (Needs Review)</p>
+        {realWeakTopics.length === 0 ? (
+          <div className="p-6 text-center text-xs text-slate-500 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <p className="font-semibold text-slate-800">No Learning Gaps Flagged</p>
+            <p>Topics with score under 70% during quiz practice will automatically appear here as learning gaps needing review.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {realWeakTopics.map((item, idx) => {
+              const topicNotes = notes.filter(n => n.topic_name === item.topic || n.subject_name === item.subject);
+              return (
+                <div key={idx} className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] text-slate-500 block uppercase font-bold">{item.subject}</span>
+                      <h4 className="text-sm font-bold text-slate-900">{item.topic}</h4>
+                      <p className="text-xs font-semibold text-rose-600 mt-0.5">Accuracy: {item.score}% (Needs Review)</p>
+                    </div>
+
+                    <button
+                      onClick={() => handleOpenAddModal(item.topic, item.subject)}
+                      className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold flex items-center gap-1 transition-all"
+                    >
+                      <Plus className="w-3 h-3 text-blue-600" />
+                      <span>Add Note</span>
+                    </button>
                   </div>
 
-                  <button
-                    onClick={() => handleOpenAddModal(item.topic, item.subject)}
-                    className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold flex items-center gap-1 transition-all"
-                  >
-                    <Plus className="w-3 h-3 text-blue-600" />
-                    <span>Add Note</span>
-                  </button>
-                </div>
-
-                {/* Display Notes for this topic */}
-                {topicNotes.length > 0 && (
-                  <div className="space-y-2 pt-2 border-t border-slate-200">
-                    <p className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                      <FileText className="w-3.5 h-3.5 text-blue-600" /> Saved Notes:
-                    </p>
-                    {topicNotes.map((n) => (
-                      <div key={n.id} className="p-2.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-800 space-y-1">
-                        <div className="flex justify-between items-start">
-                          <p className="font-medium">{n.note_text}</p>
+                  {topicNotes.length > 0 && (
+                    <div className="space-y-2 pt-2 border-t border-slate-200">
+                      <p className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                        <FileText className="w-3.5 h-3.5 text-blue-600" /> Saved Notes:
+                      </p>
+                      {topicNotes.map((n) => (
+                        <div key={n.id} className="p-2.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-800 flex justify-between items-start">
+                          <p className="font-medium leading-relaxed">{n.note_text}</p>
                           <div className="flex items-center space-x-1 shrink-0 ml-2">
                             <button onClick={() => handleOpenEditModal(n)} className="p-1 hover:text-blue-600 text-slate-400">
                               <Edit2 className="w-3 h-3" />
@@ -268,14 +307,14 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({
                             </button>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Global Notes List */}
         {notes.length > 0 && (

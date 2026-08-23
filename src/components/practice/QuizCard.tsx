@@ -50,6 +50,38 @@ export const QuizCard: React.FC<QuizCardProps> = ({
     const scorePct = Math.round((correct / Math.max(1, questions.length)) * 100);
     setResultScore(scorePct);
 
+    // Save to student activity history in localStorage
+    try {
+      const historyKey = 'quiz_history_default';
+      const existing = localStorage.getItem(historyKey);
+      const arr = existing ? JSON.parse(existing) : [];
+      arr.push({
+        id: Date.now(),
+        subject,
+        topic,
+        scorePct,
+        totalQuestions: questions.length,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem(historyKey, JSON.stringify(arr));
+
+      // Also flag weak topic if score < 70
+      if (scorePct < 70) {
+        const weakKey = 'learning_gaps_default';
+        const weakExisting = localStorage.getItem(weakKey);
+        const weakArr = weakExisting ? JSON.parse(weakExisting) : [];
+        if (!weakArr.some((w: any) => w.topic === topic)) {
+          weakArr.push({
+            topic,
+            subject,
+            score: scorePct,
+            reason: `Scored ${scorePct}% on practice quiz attempt.`
+          });
+          localStorage.setItem(weakKey, JSON.stringify(weakArr));
+        }
+      }
+    } catch (e) {}
+
     try {
       await fetch(`http://localhost:8000/quizzes/${quizId}/submit`, {
         method: 'POST',
