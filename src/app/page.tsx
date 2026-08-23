@@ -8,13 +8,12 @@ import {
   Bot,
   UserCheck,
   Award,
-  TrendingUp,
   ArrowRight,
+  GraduationCap,
   ShieldCheck,
-  CheckCircle2,
   BookOpen,
-  Zap,
-  Globe
+  Globe,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -27,45 +26,44 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-500 selection:text-white">
       {/* Navigation Bar */}
-      <nav className="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+      <nav className="border-b border-slate-200 bg-white/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex items-center justify-between shadow-xs">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-200">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
-          <span className="font-extrabold text-xl text-white tracking-tight">EduBridge AI</span>
+          <span className="font-extrabold text-xl text-slate-900 tracking-tight">EduBridge AI</span>
         </div>
 
-        <div className="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
-          <a href="#how-it-works" className="hover:text-indigo-400 transition-colors">How It Works</a>
-          <a href="#ai-tutor" className="hover:text-indigo-400 transition-colors">AI Tutor</a>
-          <a href="#human-tutor" className="hover:text-indigo-400 transition-colors">Human Tutors</a>
-          <a href="#scholarships" className="hover:text-indigo-400 transition-colors">Verified Scholarships</a>
+        <div className="hidden md:flex items-center space-x-8 text-sm font-semibold text-slate-600">
+          <a href="#roles" className="hover:text-indigo-600 transition-colors">Academic Portals</a>
+          <a href="#how-it-works" className="hover:text-indigo-600 transition-colors">Platform Workflow</a>
+          <a href="#features" className="hover:text-indigo-600 transition-colors">Capabilities</a>
         </div>
 
         <div className="flex items-center space-x-3 text-xs font-semibold">
           {user ? (
             <Link
               href={getDashboardPath()}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/25 transition-all flex items-center space-x-1.5"
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all flex items-center space-x-2"
             >
-              <span>Go to Dashboard</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>Go to My Dashboard</span>
+              <ArrowRight className="w-4 h-4" />
             </Link>
           ) : (
             <>
               <Link
                 href="/login"
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all"
+                className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 transition-all"
               >
                 Sign In
               </Link>
               <Link
                 href="/register"
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/25 transition-all"
+                className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all"
               >
-                Get Started
+                Create Account
               </Link>
             </>
           )}
@@ -73,106 +71,141 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative px-6 py-20 md:py-28 max-w-6xl mx-auto text-center space-y-8 overflow-hidden">
-        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold shadow-sm">
-          <Sparkles className="w-4 h-4 text-indigo-400" />
-          <span>AI First Support • Seamless Human Tutor Handoff • Verified Scholarships</span>
+      <section className="relative px-6 py-20 md:py-24 max-w-6xl mx-auto text-center space-y-8">
+        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold shadow-xs">
+          <Sparkles className="w-4 h-4 text-indigo-600" />
+          <span>Unified Academic Platform • AI Assisted • Tutor Supported</span>
         </div>
 
-        <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-tight max-w-4xl mx-auto">
-          Learn Smarter. <br />
-          <span className="text-gradient">Get the Right Support.</span>
+        <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight max-w-4xl mx-auto">
+          Empowering Academic Excellence Through <br />
+          <span className="text-gradient">Intelligent Learning Systems</span>
         </h1>
 
-        <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-          EduBridge AI connects grounded AI learning, human tutors upon struggle detection, progress analytics, and verified scholarship opportunities in one unified platform.
+        <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal">
+          EduBridge AI brings together grounded AI tutoring, verified human educator support, real-time learning gap analytics, and official scholarship matching in one seamless academic environment.
         </p>
 
-        {/* Demo Quick Launch Buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
           <Link
             href="/login"
-            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-bold flex items-center space-x-2 shadow-xl shadow-indigo-500/30 transition-all scale-105"
+            className="px-7 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold flex items-center space-x-2 shadow-md shadow-indigo-200 transition-all"
           >
-            <span>Sign In to Access Platform</span>
+            <span>Sign In to Academic Portal</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
-
           <Link
-            href="/login?demo=student"
-            className="px-6 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 text-sm font-bold flex items-center space-x-2 transition-all"
+            href="/register"
+            className="px-7 py-3.5 rounded-2xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 text-sm font-bold flex items-center space-x-2 transition-all shadow-xs"
           >
-            <UserCheck className="w-4 h-4 text-indigo-400" />
-            <span>Try Student Demo</span>
-          </Link>
-
-          <Link
-            href="/login?demo=tutor"
-            className="px-6 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 text-sm font-bold flex items-center space-x-2 transition-all"
-          >
-            <UserCheck className="w-4 h-4 text-emerald-400" />
-            <span>Try Tutor Demo</span>
+            <span>Register New Account</span>
           </Link>
         </div>
+      </section>
 
-        {/* Value Proposition Highlights */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-12 text-left">
-          <div className="glass-card p-4 rounded-2xl border border-slate-800 space-y-1">
-            <Bot className="w-5 h-5 text-indigo-400" />
-            <h4 className="font-bold text-sm text-white">Grounded RAG AI</h4>
-            <p className="text-[11px] text-slate-400">Step-by-step explanations with verified open textbook sources.</p>
+      {/* Role Portals Section */}
+      <section id="roles" className="px-6 py-16 bg-white border-t border-b border-slate-200">
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center space-y-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">Tailored User Roles</span>
+            <h2 className="text-3xl font-extrabold text-slate-900">Choose Your Role to Enter the Platform</h2>
+            <p className="text-xs text-slate-500 max-w-lg mx-auto">Sign in according to your designated academic role to access specialized tools.</p>
           </div>
 
-          <div className="glass-card p-4 rounded-2xl border border-slate-800 space-y-1">
-            <UserCheck className="w-5 h-5 text-emerald-400" />
-            <h4 className="font-bold text-sm text-white">Human Tutor Handoff</h4>
-            <p className="text-[11px] text-slate-400">Automatic 1-on-1 tutor pre-fill when persistent struggle is detected.</p>
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Student Role */}
+            <div className="glass-card p-6 rounded-3xl border border-slate-200 space-y-4 hover:border-indigo-300 transition-all flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
+                  <GraduationCap className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">Student Portal</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Access personalized AI tutoring across all subjects, search topics, generate targeted practice quizzes, track learning gaps, book 1-on-1 sessions, and apply for verified scholarships.
+                </p>
+              </div>
 
-          <div className="glass-card p-4 rounded-2xl border border-slate-800 space-y-1">
-            <Globe className="w-5 h-5 text-purple-400" />
-            <h4 className="font-bold text-sm text-white">Multilingual Access</h4>
-            <p className="text-[11px] text-slate-400">Full English and Tamil (தமிழ்) academic support.</p>
-          </div>
+              <Link
+                href="/login?role=student"
+                className="w-full py-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs text-center block border border-indigo-200 transition-all"
+              >
+                Sign In as Student →
+              </Link>
+            </div>
 
-          <div className="glass-card p-4 rounded-2xl border border-slate-800 space-y-1">
-            <Award className="w-5 h-5 text-amber-400" />
-            <h4 className="font-bold text-sm text-white">Verified Scholarships</h4>
-            <p className="text-[11px] text-slate-400">Deterministic rule-based eligibility evaluation.</p>
+            {/* Tutor Role */}
+            <div className="glass-card p-6 rounded-3xl border border-slate-200 space-y-4 hover:border-emerald-300 transition-all flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+                  <UserCheck className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">Tutor Portal</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Manage availability grids, review incoming student booking requests, view AI-flagged student learning gaps, record session notes, and manage educational reference materials.
+                </p>
+              </div>
+
+              <Link
+                href="/login?role=tutor"
+                className="w-full py-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs text-center block border border-emerald-200 transition-all"
+              >
+                Sign In as Tutor →
+              </Link>
+            </div>
+
+            {/* Admin Role */}
+            <div className="glass-card p-6 rounded-3xl border border-slate-200 space-y-4 hover:border-purple-300 transition-all flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">Administrator Portal</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Oversee user accounts, filter students and tutors by role, edit credentials, remove inactive users, ingest verified textbook resources, and manage scholarship rules.
+                </p>
+              </div>
+
+              <Link
+                href="/login?role=admin"
+                className="w-full py-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs text-center block border border-purple-200 transition-all"
+              >
+                Sign In as Admin →
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* How it Works Section */}
-      <section id="how-it-works" className="px-6 py-16 bg-slate-900/40 border-t border-b border-slate-800/80">
+      <section id="how-it-works" className="px-6 py-16 bg-slate-50 border-b border-slate-200">
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="text-center space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">Integrated Workflow</span>
-            <h2 className="text-3xl font-extrabold text-white">Right Explanation. Right Language. Right Tutor.</h2>
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">Integrated Workflow</span>
+            <h2 className="text-3xl font-extrabold text-slate-900">Real Academic Workflows & Analytics</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="glass-card p-6 rounded-3xl border border-slate-800 space-y-3">
+            <div className="glass-card p-6 rounded-3xl border border-slate-200 space-y-3">
               <span className="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-xs">1</span>
-              <h3 className="text-base font-bold text-white">AI First Assistance</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Student asks academic questions in English or Tamil. AI retrieves open educational textbook chunks and provides step-by-step grounded explanations with citations.
+              <h3 className="text-base font-bold text-slate-900">Grounded AI Assistance</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Students ask natural doubts across all academic subjects (Math, Physics, CS, DBMS, Chemistry, Engineering) with reference context options.
               </p>
             </div>
 
-            <div className="glass-card p-6 rounded-3xl border border-slate-800 space-y-3">
+            <div className="glass-card p-6 rounded-3xl border border-slate-200 space-y-3">
               <span className="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-xs">2</span>
-              <h3 className="text-base font-bold text-white">Seamless Human Handoff</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                If the student clicks "I still don't understand", the system identifies the subject, topic, and language, and matches available human tutors in real-time.
+              <h3 className="text-base font-bold text-slate-900">Human Tutor Handoff & Booking</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                When concept struggles are detected, students find matched tutors, select available times, and request bookings without slot conflicts.
               </p>
             </div>
 
-            <div className="glass-card p-6 rounded-3xl border border-slate-800 space-y-3">
+            <div className="glass-card p-6 rounded-3xl border border-slate-200 space-y-3">
               <span className="w-8 h-8 rounded-full bg-amber-600 text-white font-bold flex items-center justify-center text-xs">3</span>
-              <h3 className="text-base font-bold text-white">Verified Scholarships</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                The student's verified profile is matched against active government and institutional scholarships using exact rule engine logic.
+              <h3 className="text-base font-bold text-slate-900">Official Scholarship Verification</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Matches student academic scores and income criteria against verified government scholarships with direct official portal links.
               </p>
             </div>
           </div>
@@ -180,8 +213,8 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 py-8 px-6 text-center text-xs text-slate-500">
-        <p>© 2026 EduBridge AI — AI-Powered Personalized Education Access Platform. Built with Next.js, FastAPI & PostgreSQL.</p>
+      <footer className="border-t border-slate-200 py-8 px-6 text-center text-xs text-slate-500 bg-white">
+        <p>© 2026 EduBridge AI — Official Academic Platform. Built with Next.js & FastAPI.</p>
       </footer>
     </div>
   );

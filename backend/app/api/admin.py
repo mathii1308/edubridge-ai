@@ -25,10 +25,40 @@ def get_admin_analytics(db: Session = Depends(get_db)):
         "system_health": "99.98% Operational"
     }
 
-@router.get("/users")
-def get_all_users(db: Session = Depends(get_db)):
-    users = db.query(User).all()
-    return [{"id": u.id, "name": u.name, "email": u.email, "role": u.role, "created_at": u.created_at} for u in users]
+from pydantic import BaseModel
+from typing import Optional
+
+class UserUpdateSchema(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    role: Optional[str] = None
+    account_status: Optional[str] = None
+
+@router.put("/users/{user_id}")
+def update_user(user_id: int, data: UserUpdateSchema, db: Session = Depends(get_db)):
+    u = db.query(User).filter(User.id == user_id).first()
+    if not u:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if data.name is not None: u.name = data.name
+    if data.email is not None: u.email = data.email
+    if data.role is not None: u.role = data.role
+    if data.account_status is not None: u.account_status = data.account_status
+
+    db.commit()
+    db.refresh(u)
+    return {"id": u.id, "name": u.name, "email": u.email, "role": u.role, "account_status": getattr(u, 'account_status', 'active'), "created_at": u.created_at}
+
+@router.delete("/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    u = db.query(User).filter(User.id == user_id).first()
+    if not u:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    db.delete(u)
+    db.commit()
+    return {"message": "User removed successfully", "id": user_id}
+
 
 @router.post("/scholarships/sync")
 def trigger_scholarship_sync(db: Session = Depends(get_db)):

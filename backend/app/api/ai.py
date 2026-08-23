@@ -19,7 +19,9 @@ def chat_with_ai(req: AIChatRequest, db: Session = Depends(get_db)):
         learning_level=req.learning_level or "Intermediate",
         subject=req.subject,
         topic=req.topic,
-        action_type=req.action_type or "explain"
+        action_type=req.action_type or "explain",
+        reference_text=req.reference_text,
+        reference_title=req.reference_title
     )
     return response
 

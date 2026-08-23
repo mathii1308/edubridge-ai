@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ChatMessage, Citation } from '@/types';
+import { ChatMessage } from '@/types';
 import { TutorHandoffModal } from './TutorHandoffModal';
 import {
   Send,
@@ -9,15 +9,14 @@ import {
   User,
   Sparkles,
   BookOpen,
-  HelpCircle,
   Lightbulb,
-  CheckCircle2,
   ExternalLink,
-  Languages,
-  UserCheck,
   AlertTriangle,
   ThumbsUp,
-  ThumbsDown
+  ThumbsDown,
+  Paperclip,
+  X,
+  FileText
 } from 'lucide-react';
 
 export const ChatInterface: React.FC = () => {
@@ -25,7 +24,7 @@ export const ChatInterface: React.FC = () => {
     {
       id: '1',
       sender: 'ai',
-      text: "Hello! I am EduBridge AI, your personalized academic tutor. Select your subject or topic and ask me any doubt. If you struggle with a concept, you can escalate directly to a verified human tutor anytime.",
+      text: "Hello! I am EduBridge AI, your general academic tutor. Ask me doubts across any academic subject (Mathematics, Physics, Chemistry, CS, DBMS, Engineering, etc.). You can also attach reference materials for grounded context.",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     }
   ]);
@@ -33,9 +32,13 @@ export const ChatInterface: React.FC = () => {
   const [input, setInput] = useState('');
   const [language, setLanguage] = useState<'English' | 'Tamil'>('English');
   const [learningLevel, setLearningLevel] = useState<'Beginner' | 'Intermediate' | 'Advanced'>('Intermediate');
-  const [subject, setSubject] = useState('DBMS');
-  const [topic, setTopic] = useState('Normalization');
-  const [studentRequirement, setStudentRequirement] = useState('Needs explanation of 2NF and 3NF');
+  const [subject, setSubject] = useState('Auto-Detect');
+  const [topic, setTopic] = useState('General Concept');
+  const [studentRequirement, setStudentRequirement] = useState('Needs concept explanation');
+
+  const [showRefInput, setShowRefInput] = useState(false);
+  const [refTitle, setRefTitle] = useState('');
+  const [refText, setRefText] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
   const [showHandoffModal, setShowHandoffModal] = useState(false);
@@ -65,9 +68,11 @@ export const ChatInterface: React.FC = () => {
           message: queryText,
           language: language,
           learning_level: learningLevel,
-          subject: subject,
-          topic: topic,
-          action_type: actionType
+          subject: subject === 'Auto-Detect' ? undefined : subject,
+          topic: topic === 'General Concept' ? undefined : topic,
+          action_type: actionType,
+          reference_text: refText.trim() ? refText : undefined,
+          reference_title: refTitle.trim() ? refTitle : undefined
         })
       });
 
@@ -99,18 +104,20 @@ export const ChatInterface: React.FC = () => {
         setShowHandoffModal(true);
       }
     } catch {
-      // Offline AI response engine
+      // Offline fallback AI response engine
       const isStruggle = actionType === 'struggle' || queryText.toLowerCase().includes("don't understand");
 
       let replyText = "";
-      if (isStruggle) {
+      if (refText.trim()) {
+        replyText = `📌 **Answer based on student provided reference context (${refTitle || 'Uploaded Reference'}):**\n\nBased on your provided reference text:\n\n1. **Core Insight:** The reference outlines fundamental rules for ${subject} (${topic}).\n2. **Guidance for '${queryText}':** Following your provided reference, solve step-by-step applying the specified formulas.\n3. **Summary:** All conditions match the constraints in your reference text.`;
+      } else if (isStruggle) {
         replyText = language === 'Tamil'
           ? `**${topic} பற்றிய விளக்கம் இன்னமும் கடினமாக உள்ளதா?** நாங்கள் உங்களுக்கு உதவ தகுதியான ஆசிரியரை பரிந்துரைக்க முடியும்.`
           : `**I understand this concept is tricky!** Learning ${topic} (${subject}) requires step-by-step guidance. Connecting with a human tutor will help you master it faster.`;
       } else {
         replyText = language === 'Tamil'
-          ? `**EduBridge AI கற்றல் உதவியாளர் (${subject} - ${topic}):**\n\nசார்பு நிகழ்தகவு சூத்திரம்: P(A|B) = P(A ∩ B) / P(B).\n\n1. முதல் நிகழ்ச்சி நிகழ்ந்த பிறகுதான் இரண்டாம் நிகழ்ச்சி நடக்கும்.`
-          : `**Step-by-Step Explanation for ${topic} (${subject}):**\n\n1. **Concept Definition:** Normalization is the process of organizing data in a database to reduce redundancy.\n2. **2NF (Second Normal Form):** Every non-key attribute must be fully functionally dependent on the primary key (no partial dependencies).\n3. **3NF (Third Normal Form):** No non-key attribute is transitively dependent on the primary key.`;
+          ? `**EduBridge AI கற்றல் உதவியாளர் (${subject} - ${topic}):**\n\n1. கோட்பாட்டின் அடிப்படை கருத்துக்களை புரிந்துகொள்ள வேண்டும்.\n2. படி படியாக சூத்திரத்தைப் பயன்படுத்தவும்.`
+          : `**Step-by-Step Explanation for ${topic} (${subject}):**\n\n1. **Concept Breakdown:** Step-by-step procedure to analyze doubts on ${queryText}.\n2. **Methodology:** State assumptions, apply standard equations, and compute final results.\n3. **Verification:** Check boundary conditions for validity.`;
       }
 
       const fallbackMsg: ChatMessage = {
@@ -119,7 +126,12 @@ export const ChatInterface: React.FC = () => {
         text: replyText,
         subject: subject,
         topic: topic,
-        citations: [], // Clean empty array if no retrieval source
+        citations: refText.trim() ? [{
+          title: `Reference: ${refTitle || 'Student Reference Text'}`,
+          source_name: "Uploaded Reference Material",
+          source_url: "#reference",
+          snippet: refText.slice(0, 100) + "..."
+        }] : [],
         needs_tutor: isStruggle,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
@@ -134,61 +146,98 @@ export const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] glass-card rounded-3xl overflow-hidden border border-slate-800">
+    <div className="flex flex-col h-[calc(100vh-140px)] glass-card rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm">
       {/* Top Options Bar */}
-      <div className="bg-slate-900/90 border-b border-slate-800 p-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-slate-50 border-b border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+          <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm">
             <Bot className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              EduBridge AI Tutor
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 font-medium">
-                AI Tutor Engine
+            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              EduBridge AI General Academic Tutor
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-bold border border-indigo-200">
+                All Subjects Supported
               </span>
             </h2>
-            <p className="text-[11px] text-slate-400">Subject: {subject} • Topic: {topic}</p>
+            <p className="text-[11px] text-slate-500 font-medium">Subject: {subject} • Topic: {topic}</p>
           </div>
         </div>
 
-        {/* Controls: Language & Learning Level */}
-        <div className="flex items-center space-x-2">
-          {/* Language Selector */}
-          <div className="flex items-center bg-slate-800 rounded-xl p-1 border border-slate-700 text-xs">
+        {/* Controls: Subject, Language & Learning Level */}
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <input
+            type="text"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Subject (e.g. Physics)"
+            className="w-28 bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs text-slate-800 focus:outline-none focus:border-indigo-600 font-medium"
+          />
+
+          <button
+            onClick={() => setShowRefInput(!showRefInput)}
+            className={`px-2.5 py-1 rounded-xl border text-xs font-bold flex items-center gap-1 transition-all ${
+              refText ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            <Paperclip className="w-3.5 h-3.5" />
+            <span>{refText ? 'Reference Attached' : 'Attach Reference'}</span>
+          </button>
+
+          <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200 text-xs">
             <button
               onClick={() => setLanguage('English')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
-                language === 'English' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                language === 'English' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               English
             </button>
             <button
               onClick={() => setLanguage('Tamil')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
-                language === 'Tamil' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                language === 'Tamil' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              தமிழ் (Tamil)
+              தமிழ்
             </button>
           </div>
-
-          {/* Level Selector */}
-          <select
-            value={learningLevel}
-            onChange={(e) => setLearningLevel(e.target.value as any)}
-            className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-500"
-          >
-            <option value="Beginner">Beginner Level</option>
-            <option value="Intermediate">Intermediate Level</option>
-            <option value="Advanced">Advanced Level</option>
-          </select>
         </div>
       </div>
 
+      {/* Reference Context Attachment Input Drawer */}
+      {showRefInput && (
+        <div className="p-4 bg-slate-50 border-b border-slate-200 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <FileText className="w-4 h-4 text-indigo-600" />
+              Provide Reference Material / Textbook Text:
+            </span>
+            <button onClick={() => setShowRefInput(false)} className="text-slate-400 hover:text-slate-600">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <input
+            type="text"
+            value={refTitle}
+            onChange={(e) => setRefTitle(e.target.value)}
+            placeholder="Reference Title / Source Name (e.g. Chapter 4 Optics Notes)"
+            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-indigo-600 font-medium"
+          />
+
+          <textarea
+            value={refText}
+            onChange={(e) => setRefText(e.target.value)}
+            rows={2}
+            placeholder="Paste reference text or textbook excerpt here. AI Tutor will ground answers on this material..."
+            className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:border-indigo-600 font-medium"
+          />
+        </div>
+      )}
+
       {/* Messages Stream */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -197,10 +246,10 @@ export const ChatInterface: React.FC = () => {
             }`}
           >
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 shadow-xs ${
                 msg.sender === 'user'
-                  ? 'bg-gradient-to-tr from-indigo-500 to-purple-600 text-white'
-                  : 'bg-slate-800 border border-indigo-500/40 text-indigo-400'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-white border border-slate-200 text-indigo-600'
               }`}
             >
               {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
@@ -210,63 +259,64 @@ export const ChatInterface: React.FC = () => {
               <div
                 className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed ${
                   msg.sender === 'user'
-                    ? 'bg-indigo-600 text-white rounded-tr-none'
-                    : 'bg-slate-900/90 text-slate-200 border border-slate-800 rounded-tl-none shadow-md'
+                    ? 'bg-indigo-600 text-white rounded-tr-none shadow-xs'
+                    : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none shadow-xs'
                 }`}
               >
                 <div className="whitespace-pre-wrap">{msg.text}</div>
 
                 {/* Educational Citations */}
                 {msg.citations && msg.citations.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-slate-800/80 space-y-1.5">
-                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1">
-                      <BookOpen className="w-3 h-3 text-indigo-400" />
-                      Educational Sources:
+                  <div className="mt-3 pt-3 border-t border-slate-100 space-y-1.5">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold flex items-center gap-1">
+                      <BookOpen className="w-3 h-3 text-indigo-600" />
+                      Educational Sources / Reference Basis:
                     </p>
                     {msg.citations.map((c, i) => (
-                      <a
+                      <div
                         key={i}
-                        href={c.source_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-between p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 text-[11px] text-indigo-300 transition-colors group"
+                        className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-indigo-700 font-medium"
                       >
-                        <span className="font-medium truncate max-w-xs">Source: {c.title} ({c.source_name})</span>
-                        <ExternalLink className="w-3 h-3 text-slate-500 group-hover:text-indigo-400 shrink-0" />
-                      </a>
+                        <span className="truncate max-w-xs">{c.title}</span>
+                        {c.source_url !== '#reference' && (
+                          <a href={c.source_url} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-indigo-600">
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
                     ))}
                   </div>
                 )}
 
                 {/* Escalation Feedback Check on AI Messages */}
                 {msg.sender === 'ai' && (
-                  <div className="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                  <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                     <span>Did this explanation help?</span>
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => sendMessage("Yes, thank you! I understand this concept now.", "understand")}
-                        className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 flex items-center gap-1 font-medium"
+                        className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1 font-bold"
                       >
-                        <ThumbsUp className="w-3 h-3 text-emerald-400" /> Yes, I understand
+                        <ThumbsUp className="w-3 h-3 text-emerald-600" /> Yes
                       </button>
                       <button
                         onClick={() => sendMessage(`I still don't understand ${topic} in ${subject}.`, "struggle")}
-                        className="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 flex items-center gap-1 font-medium"
+                        className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 flex items-center gap-1 font-bold"
                       >
-                        <ThumbsDown className="w-3 h-3 text-amber-400" /> Not yet
+                        <ThumbsDown className="w-3 h-3 text-amber-600" /> Not yet
                       </button>
                     </div>
                   </div>
                 )}
               </div>
 
-              <span className="text-[10px] text-slate-500 px-1">{msg.timestamp}</span>
+              <span className="text-[10px] text-slate-400 px-1">{msg.timestamp}</span>
             </div>
           </div>
         ))}
 
         {isLoading && (
-          <div className="flex items-center space-x-2 text-indigo-400 text-xs p-3">
+          <div className="flex items-center space-x-2 text-indigo-600 text-xs p-3 font-bold">
             <Sparkles className="w-4 h-4 animate-spin" />
             <span>Consulting AI Learning Engine...</span>
           </div>
@@ -274,44 +324,44 @@ export const ChatInterface: React.FC = () => {
       </div>
 
       {/* Quick Action Prompt Pills */}
-      <div className="p-3 bg-slate-900/80 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
-        <span className="text-[11px] text-slate-400 font-medium mr-1">Controls:</span>
+      <div className="p-3 bg-white border-t border-slate-200 flex flex-wrap items-center gap-2">
+        <span className="text-[11px] text-slate-400 font-bold mr-1">Controls:</span>
         <button
           onClick={() => sendMessage("Can you explain this step-by-step in simpler terms?", "simplify")}
-          className="px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1.5"
+          className="px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-[11px] text-slate-700 font-bold transition-all flex items-center gap-1.5"
         >
-          <Lightbulb className="w-3 h-3 text-amber-400" /> Simplify Explanation
+          <Lightbulb className="w-3 h-3 text-amber-600" /> Simplify Explanation
         </button>
 
         <button
           onClick={() => sendMessage("Give me a practical real-world example.", "example")}
-          className="px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1.5"
+          className="px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-[11px] text-slate-700 font-bold transition-all flex items-center gap-1.5"
         >
-          <BookOpen className="w-3 h-3 text-emerald-400" /> Real-World Example
+          <BookOpen className="w-3 h-3 text-emerald-600" /> Practical Example
         </button>
 
         <button
           onClick={() => sendMessage(`I need help from a human tutor for ${subject} (${topic}).`, "struggle")}
-          className="px-3 py-1 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-[11px] text-amber-300 font-semibold transition-all flex items-center gap-1.5"
+          className="px-3 py-1 rounded-full bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[11px] text-amber-700 font-bold transition-all flex items-center gap-1.5"
         >
-          <AlertTriangle className="w-3 h-3 text-amber-400" /> Connect with Human Tutor
+          <AlertTriangle className="w-3 h-3 text-amber-600" /> Connect with Human Tutor
         </button>
       </div>
 
       {/* Input Box */}
-      <div className="p-4 bg-slate-900 border-t border-slate-800 flex items-center space-x-3">
+      <div className="p-4 bg-white border-t border-slate-200 flex items-center space-x-3">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-          placeholder={language === 'Tamil' ? "உங்கள் கேள்வியைக் கேளுங்கள்..." : "Ask your academic doubt..."}
-          className="flex-1 bg-slate-800/90 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all"
+          placeholder={language === 'Tamil' ? "உங்கள் கேள்வியைக் கேளுங்கள்..." : "Ask any academic question across any subject..."}
+          className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all font-medium"
         />
         <button
           onClick={() => sendMessage()}
           disabled={!input.trim() || isLoading}
-          className="p-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white disabled:opacity-50 transition-all shadow-lg shadow-indigo-500/25"
+          className="p-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 transition-all shadow-sm"
         >
           <Send className="w-5 h-5" />
         </button>
@@ -330,3 +380,4 @@ export const ChatInterface: React.FC = () => {
     </div>
   );
 };
+

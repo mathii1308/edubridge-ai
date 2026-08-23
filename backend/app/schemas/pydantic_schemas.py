@@ -64,6 +64,9 @@ class AIChatRequest(BaseModel):
     subject: Optional[str] = None
     topic: Optional[str] = None
     action_type: Optional[str] = "explain"  # explain, simplify, example, step_by_step, test, struggle
+    reference_text: Optional[str] = None
+    reference_title: Optional[str] = None
+
 
 class CitationSchema(BaseModel):
     title: str

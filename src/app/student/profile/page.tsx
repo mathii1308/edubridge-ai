@@ -51,46 +51,46 @@ function StudentProfileContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
+    <div className="min-h-screen bg-slate-50 flex flex-col text-slate-900">
       <Navbar />
 
       <div className="flex flex-1">
         <Sidebar />
 
         <main className="flex-1 p-6 space-y-6 max-w-4xl">
-          <div className="glass-card rounded-3xl p-6 border border-slate-800">
-            <h1 className="text-xl font-bold text-white">Student Academic Profile & Preferences</h1>
-            <p className="text-xs text-slate-400 mt-1">Updates to preferred language, learning level, score, and state dynamically affect AI Tutor responses and scholarship eligibility matching.</p>
+          <div className="glass-card rounded-3xl p-6 border border-slate-200 bg-white shadow-sm">
+            <h1 className="text-xl font-extrabold text-slate-900">Student Academic Profile & Preferences</h1>
+            <p className="text-xs text-slate-500 mt-1">Updates to preferred language, learning level, score, and state dynamically affect AI Tutor responses and scholarship eligibility matching.</p>
           </div>
 
-          <form onSubmit={handleSave} className="glass-card rounded-3xl p-6 border border-slate-800 space-y-5">
+          <form onSubmit={handleSave} className="glass-card rounded-3xl p-6 border border-slate-200 bg-white space-y-5 shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div>
-                <label className="font-semibold text-slate-300 mb-1 block">Full Name:</label>
+                <label className="font-bold text-slate-700 mb-1 block">Full Name:</label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-bold focus:outline-none focus:border-indigo-600"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-slate-300 mb-1 block">Email Address:</label>
+                <label className="font-bold text-slate-700 mb-1 block">Email Address:</label>
                 <input
                   type="email"
                   value={form.email}
                   disabled
-                  className="w-full bg-slate-900/50 border border-slate-800/80 rounded-xl px-3.5 py-2.5 text-slate-500 cursor-not-allowed"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-500 font-bold cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-slate-300 mb-1 block">Preferred Learning Language:</label>
+                <label className="font-bold text-slate-700 mb-1 block">Preferred Learning Language:</label>
                 <select
                   value={form.preferredLanguage}
                   onChange={(e) => setForm({ ...form, preferredLanguage: e.target.value })}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-bold focus:outline-none focus:border-indigo-600"
                 >
                   <option value="English">English</option>
                   <option value="Tamil">Tamil (தமிழ்)</option>
@@ -98,11 +98,11 @@ function StudentProfileContent() {
               </div>
 
               <div>
-                <label className="font-semibold text-slate-300 mb-1 block">AI Tutor Learning Level:</label>
+                <label className="font-bold text-slate-700 mb-1 block">AI Tutor Learning Level:</label>
                 <select
                   value={form.learningLevel}
                   onChange={(e) => setForm({ ...form, learningLevel: e.target.value })}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-bold focus:outline-none focus:border-indigo-600"
                 >
                   <option value="Beginner">Beginner Level</option>
                   <option value="Intermediate">Intermediate Level</option>
@@ -111,59 +111,59 @@ function StudentProfileContent() {
               </div>
 
               <div>
-                <label className="font-semibold text-slate-300 mb-1 block">State Domicile:</label>
+                <label className="font-bold text-slate-700 mb-1 block">State Domicile:</label>
                 <input
                   type="text"
                   value={form.state}
                   onChange={(e) => setForm({ ...form, state: e.target.value })}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-bold focus:outline-none focus:border-indigo-600"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-slate-300 mb-1 block">Course Stream:</label>
+                <label className="font-bold text-slate-700 mb-1 block">Course Stream:</label>
                 <input
                   type="text"
                   value={form.course}
                   onChange={(e) => setForm({ ...form, course: e.target.value })}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-bold focus:outline-none focus:border-indigo-600"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-slate-300 mb-1 block">Academic Score Percentage (%):</label>
+                <label className="font-bold text-slate-700 mb-1 block">Academic Score Percentage (%):</label>
                 <input
                   type="number"
                   step="0.1"
                   value={form.academicScore}
                   onChange={(e) => setForm({ ...form, academicScore: parseFloat(e.target.value) })}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-bold focus:outline-none focus:border-indigo-600"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-slate-300 mb-1 block">Annual Family Income (INR ₹):</label>
+                <label className="font-bold text-slate-700 mb-1 block">Annual Family Income (INR ₹):</label>
                 <input
                   type="number"
                   value={form.incomeRange}
                   onChange={(e) => setForm({ ...form, incomeRange: parseFloat(e.target.value) })}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-bold focus:outline-none focus:border-indigo-600"
                 />
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+            <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
               {saved ? (
-                <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 animate-pulse">
-                  <CheckCircle2 className="w-4 h-4" /> Profile parameters updated & synced with rule engine!
+                <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5 animate-pulse">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Profile parameters updated & synced with rule engine!
                 </span>
               ) : (
-                <span className="text-[11px] text-slate-500">Your profile data is strictly secured.</span>
+                <span className="text-[11px] text-slate-500 font-medium">Your profile data is strictly secured.</span>
               )}
 
               <button
                 type="submit"
-                className="py-2.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-2 shadow-md shadow-indigo-500/20"
+                className="py-2.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-2 shadow-sm"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Profile Settings</span>

@@ -16,20 +16,44 @@ import {
   CalendarDays,
   BrainCircuit,
   ArrowRight,
-  Sparkles,
-  BookOpen
+  Plus,
+  BookOpen,
+  CheckCircle2,
+  X
 } from 'lucide-react';
+
+const AVAILABLE_SUBJECTS = [
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "Computer Science & Programming",
+  "DBMS & SQL",
+  "Electrical & Electronics",
+  "Mechanical Engineering"
+];
 
 function StudentDashboardContent() {
   const { user } = useAuth();
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [upcomingBooking, setUpcomingBooking] = useState<Booking | null>(null);
-  const [isLoadingBookings, setIsLoadingBookings] = useState(true);
+  const [showSubjectModal, setShowSubjectModal] = useState(false);
+
+  useEffect(() => {
+    // Load enrolled subjects from localStorage
+    const saved = localStorage.getItem(`enrolled_subjects_${user?.id || 1}`);
+    if (saved) {
+      try {
+        setSelectedSubjects(JSON.parse(saved));
+      } catch {
+        setSelectedSubjects([]);
+      }
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     if (user?.id) {
       const fetchBookings = async () => {
         try {
-          setIsLoadingBookings(true);
           const res = await fetch(`http://localhost:8000/bookings?user_role=student&user_id=${user.id}`);
           if (res.ok) {
             const data: Booking[] = await res.json();
@@ -38,16 +62,25 @@ function StudentDashboardContent() {
           }
         } catch {
           setUpcomingBooking(null);
-        } finally {
-          setIsLoadingBookings(false);
         }
       };
       fetchBookings();
     }
   }, [user?.id]);
 
+  const toggleSubject = (sub: string) => {
+    let updated: string[];
+    if (selectedSubjects.includes(sub)) {
+      updated = selectedSubjects.filter(s => s !== sub);
+    } else {
+      updated = [...selectedSubjects, sub];
+    }
+    setSelectedSubjects(updated);
+    localStorage.setItem(`enrolled_subjects_${user?.id || 1}`, JSON.stringify(updated));
+  };
+
   return (
-    <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
+    <div className="min-h-screen bg-slate-50 flex flex-col text-slate-900">
       <Navbar />
 
       <div className="flex flex-1">
@@ -55,23 +88,30 @@ function StudentDashboardContent() {
 
         <main className="flex-1 p-6 space-y-6 overflow-y-auto max-w-7xl">
           {/* Welcome Banner */}
-          <div className="glass-card rounded-3xl p-6 border border-indigo-500/20 bg-gradient-to-r from-indigo-900/40 via-purple-900/20 to-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="glass-card rounded-3xl p-6 border border-slate-200 bg-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
             <div>
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
                 Student Learning Portal
               </span>
-              <h1 className="text-2xl font-extrabold text-white mt-2">
+              <h1 className="text-2xl font-extrabold text-slate-900 mt-2">
                 Welcome back, {user?.name || 'Student'} 👋
               </h1>
-              <p className="text-xs text-slate-300 mt-1 max-w-xl">
-                AI tutoring and human support are active for your account (<strong>{user?.email}</strong>).
+              <p className="text-xs text-slate-600 mt-1 max-w-xl">
+                Account Email: <strong>{user?.email}</strong>. Select your enrolled subjects below to personalize your learning analytics.
               </p>
             </div>
 
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 shrink-0">
+              <button
+                onClick={() => setShowSubjectModal(true)}
+                className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center space-x-1.5 border border-slate-300 transition-all"
+              >
+                <Plus className="w-4 h-4 text-indigo-600" />
+                <span>{selectedSubjects.length === 0 ? 'Select Enrolled Subjects' : 'Manage My Subjects'}</span>
+              </button>
               <Link
                 href="/student/ai-tutor"
-                className="py-3 px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center space-x-2 shadow-lg shadow-indigo-500/30 transition-all"
+                className="py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center space-x-1.5 shadow-sm transition-all"
               >
                 <Bot className="w-4 h-4" />
                 <span>Launch AI Tutor</span>
@@ -79,195 +119,200 @@ function StudentDashboardContent() {
             </div>
           </div>
 
-          {/* Grid Layout: Progress + Upcoming Session */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Subject Mastery Performance */}
-            <div className="lg:col-span-2 glass-card rounded-3xl p-6 border border-slate-800 space-y-5">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-indigo-400" />
-                  Subject Mastery Performance
-                </h3>
-                <Link href="/student/progress" className="text-xs text-indigo-400 hover:underline">
-                  View Detailed Analytics →
-                </Link>
+          {/* Initial State Banner if No Subjects Selected */}
+          {selectedSubjects.length === 0 ? (
+            <div className="glass-card rounded-3xl p-10 border border-slate-200 bg-white text-center space-y-4 shadow-xs">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mx-auto">
+                <BookOpen className="w-7 h-7" />
+              </div>
+              <div className="space-y-1 max-w-md mx-auto">
+                <h3 className="text-lg font-bold text-slate-900">Personalize Your Academic Dashboard</h3>
+                <p className="text-xs text-slate-500">
+                  Select the academic subjects you are currently studying. Your mastery performance, weak topic alerts, and practice quizzes will adapt to your real selection.
+                </p>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className="text-slate-300">Mathematics & Probability</span>
-                    <span className="text-indigo-400">78%</span>
-                  </div>
-                  <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-indigo-500 rounded-full" style={{ width: '78%' }}></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className="text-slate-300">DBMS & Normalization</span>
-                    <span className="text-emerald-400">65%</span>
-                  </div>
-                  <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: '65%' }}></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className="text-slate-300">Physics & Wave Optics</span>
-                    <span className="text-amber-400">82%</span>
-                  </div>
-                  <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-amber-500 rounded-full" style={{ width: '82%' }}></div>
-                  </div>
-                </div>
+              <div className="flex flex-wrap items-center justify-center gap-2 max-w-xl mx-auto pt-2">
+                {AVAILABLE_SUBJECTS.map((sub) => (
+                  <button
+                    key={sub}
+                    onClick={() => toggleSubject(sub)}
+                    className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200 text-xs font-bold text-slate-700 transition-all flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>{sub}</span>
+                  </button>
+                ))}
               </div>
             </div>
+          ) : (
+            /* Active Subjects Dashboard */
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Subject Mastery Performance */}
+              <div className="lg:col-span-2 glass-card rounded-3xl p-6 border border-slate-200 bg-white space-y-5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-indigo-600" />
+                    Enrolled Subject Performance
+                  </h3>
+                  <button
+                    onClick={() => setShowSubjectModal(true)}
+                    className="text-xs text-indigo-600 font-bold hover:underline"
+                  >
+                    Edit Enrolled Subjects ({selectedSubjects.length})
+                  </button>
+                </div>
 
-            {/* Upcoming Session Card */}
-            <div className="glass-card rounded-3xl p-6 border border-slate-800 space-y-4 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Upcoming Session</span>
-                  {upcomingBooking && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold uppercase">
-                      {upcomingBooking.status}
-                    </span>
+                <div className="space-y-4">
+                  {selectedSubjects.map((subject, idx) => (
+                    <div key={subject}>
+                      <div className="flex justify-between text-xs font-bold mb-1.5">
+                        <span className="text-slate-800">{subject}</span>
+                        <span className="text-indigo-600 font-bold">Active Learning</span>
+                      </div>
+                      <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                        <div
+                          className="h-full bg-indigo-600 rounded-full"
+                          style={{ width: `${Math.min(100, 45 + (idx * 20))}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Upcoming Session Card */}
+              <div className="glass-card rounded-3xl p-6 border border-slate-200 bg-white space-y-4 flex flex-col justify-between shadow-xs">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Upcoming Session</span>
+                    {upcomingBooking && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold uppercase border border-emerald-200">
+                        {upcomingBooking.status}
+                      </span>
+                    )}
+                  </div>
+
+                  {upcomingBooking ? (
+                    <div>
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center font-bold text-indigo-700">
+                          {upcomingBooking.teacher_name ? upcomingBooking.teacher_name.charAt(0) : 'T'}
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-900">{upcomingBooking.teacher_name || 'Assigned Tutor'}</h4>
+                          <p className="text-xs text-indigo-600 font-bold">{upcomingBooking.subject_name} • {upcomingBooking.topic_name}</p>
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+                        <p className="text-slate-700">📅 Date: {upcomingBooking.scheduled_date}</p>
+                        <p className="text-indigo-700 font-bold">⏰ Time: {upcomingBooking.start_time} - {upcomingBooking.end_time}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="py-6 text-center text-slate-400 space-y-2">
+                      <CalendarDays className="w-8 h-8 mx-auto text-slate-300" />
+                      <p className="text-xs font-medium text-slate-500">No upcoming tutor sessions booked yet.</p>
+                    </div>
                   )}
                 </div>
 
-                {upcomingBooking ? (
-                  <div>
-                    <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-10 h-10 rounded-2xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-300">
-                        {upcomingBooking.teacher_name ? upcomingBooking.teacher_name.charAt(0) : 'T'}
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-white">{upcomingBooking.teacher_name || 'Assigned Tutor'}</h4>
-                        <p className="text-xs text-indigo-300">{upcomingBooking.subject_name} • {upcomingBooking.topic_name}</p>
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs space-y-1">
-                      <p className="text-slate-300">📅 Date: {upcomingBooking.scheduled_date}</p>
-                      <p className="text-indigo-400 font-medium">⏰ Time: {upcomingBooking.start_time} - {upcomingBooking.end_time}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="py-6 text-center text-slate-400 space-y-2">
-                    <CalendarDays className="w-8 h-8 mx-auto text-slate-600" />
-                    <p className="text-xs">No upcoming tutor sessions booked yet.</p>
-                  </div>
-                )}
-              </div>
-
-              <Link
-                href="/student/sessions"
-                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold text-center block transition-all"
-              >
-                {upcomingBooking ? 'View All Sessions' : 'Book a Session'}
-              </Link>
-            </div>
-          </div>
-
-          {/* Weak Topics Section */}
-          <div className="glass-card rounded-3xl p-6 border border-amber-500/20 bg-amber-500/5 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <AlertTriangle className="w-5 h-5 text-amber-400" />
-                <h3 className="text-sm font-bold text-white">Identified Weak Topics (Requires Action)</h3>
-              </div>
-              <span className="text-[10px] text-amber-300 font-semibold">AI Identified Gaps</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="text-sm font-bold text-white">DBMS Normalization (2NF & 3NF)</h4>
-                    <p className="text-xs text-slate-400">Database Management Systems</p>
-                  </div>
-                  <span className="text-xs font-extrabold text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/30">
-                    Needs Attention
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-800">
-                  <Link
-                    href="/student/ai-tutor?subject=DBMS&topic=Normalization"
-                    className="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-500 transition-all"
-                  >
-                    Ask AI Tutor
-                  </Link>
-                  <Link
-                    href="/student/tutors?subject=DBMS&topic=Normalization"
-                    className="px-3 py-1.5 rounded-xl bg-slate-800 text-indigo-300 text-xs font-medium hover:bg-slate-700 transition-all"
-                  >
-                    Connect with Human Tutor
-                  </Link>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="text-sm font-bold text-white">Probability & Bayes Theorem</h4>
-                    <p className="text-xs text-slate-400">Mathematics</p>
-                  </div>
-                  <span className="text-xs font-extrabold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30">
-                    Developing
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-800">
-                  <Link
-                    href="/student/practice"
-                    className="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-500 transition-all"
-                  >
-                    Practice Quiz
-                  </Link>
-                  <Link
-                    href="/student/ai-tutor?subject=Mathematics&topic=Probability"
-                    className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700 transition-all"
-                  >
-                    Ask AI Tutor
-                  </Link>
-                </div>
+                <Link
+                  href="/student/sessions"
+                  className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold text-center block transition-all border border-slate-200"
+                >
+                  {upcomingBooking ? 'View All Sessions' : 'Book a Session'}
+                </Link>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Scholarship Recommendation Teaser */}
-          <div className="glass-card rounded-3xl p-6 border border-slate-800 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Award className="w-5 h-5 text-amber-400" />
-                <h3 className="text-sm font-bold text-white">Recommended Verified Scholarships</h3>
+          {/* Quick Action Hub */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="glass-card p-5 rounded-2xl border border-slate-200 bg-white space-y-2 shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                <Bot className="w-5 h-5" />
               </div>
-              <Link href="/student/scholarships" className="text-xs text-indigo-400 hover:underline">
-                View All Opportunities →
+              <h4 className="font-bold text-sm text-slate-900">AI Academic Tutor</h4>
+              <p className="text-xs text-slate-500">Ask any doubt naturally across all subjects with step-by-step guidance.</p>
+              <Link href="/student/ai-tutor" className="text-xs text-indigo-600 font-bold hover:underline inline-block pt-1">
+                Open AI Tutor →
               </Link>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] text-emerald-400 font-bold uppercase">95% Profile Eligibility Match</span>
-                <h4 className="text-sm font-bold text-white mt-0.5">PM YASASVI Central Sector Post-Matric Scholarship 2026</h4>
-                <p className="text-xs text-slate-400 mt-1">Provider: Ministry of Social Justice & Empowerment • Benefit: ₹75,000 / year</p>
+            <div className="glass-card p-5 rounded-2xl border border-slate-200 bg-white space-y-2 shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                <BrainCircuit className="w-5 h-5" />
               </div>
+              <h4 className="font-bold text-sm text-slate-900">Practice & Quizzes</h4>
+              <p className="text-xs text-slate-500">Search topics and generate concept-specific quizzes dynamically.</p>
+              <Link href="/student/practice" className="text-xs text-emerald-600 font-bold hover:underline inline-block pt-1">
+                Start Practice →
+              </Link>
+            </div>
 
-              <Link
-                href="/student/scholarships"
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shrink-0"
-              >
-                Check Eligibility
+            <div className="glass-card p-5 rounded-2xl border border-slate-200 bg-white space-y-2 shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                <Award className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-sm text-slate-900">Verified Scholarships</h4>
+              <p className="text-xs text-slate-500">Check official state and central government scholarship portals.</p>
+              <Link href="/student/scholarships" className="text-xs text-amber-600 font-bold hover:underline inline-block pt-1">
+                View Scholarships →
               </Link>
             </div>
           </div>
         </main>
       </div>
+
+      {/* Modal to Select Enrolled Subjects */}
+      {showSubjectModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white max-w-md w-full rounded-3xl p-6 border border-slate-200 shadow-xl space-y-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-slate-900">Select Your Enrolled Subjects</h3>
+              <button
+                onClick={() => setShowSubjectModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:bg-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-500">
+              Select the academic subjects you are currently studying. Your dashboard analytics and quiz options will adapt accordingly.
+            </p>
+
+            <div className="space-y-2">
+              {AVAILABLE_SUBJECTS.map((sub) => {
+                const isSelected = selectedSubjects.includes(sub);
+                return (
+                  <button
+                    key={sub}
+                    onClick={() => toggleSubject(sub)}
+                    className={`w-full p-3 rounded-2xl text-xs font-bold flex items-center justify-between border transition-all ${
+                      isSelected
+                        ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span>{sub}</span>
+                    {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-600" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => setShowSubjectModal(false)}
+              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition-all"
+            >
+              Save Subject Preferences
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -279,3 +324,4 @@ export default function StudentDashboard() {
     </ProtectedRoute>
   );
 }
+

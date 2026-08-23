@@ -1,29 +1,28 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
-import { Bell, Sparkles, Languages, Check, ShieldCheck, LogOut } from 'lucide-react';
+import { Sparkles, LogOut, GraduationCap, UserCheck, ShieldCheck } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { user, role, logout } = useAuth();
-  const [showNotifs, setShowNotifs] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
-    <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 px-6 py-3.5 flex items-center justify-between sticky top-0 z-40">
+    <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 px-6 py-3.5 flex items-center justify-between sticky top-0 z-40 shadow-xs">
       <div className="flex items-center space-x-3 md:hidden">
         <Link href="/" className="flex items-center space-x-2">
           <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold text-white text-sm">EduBridge AI</span>
+          <span className="font-bold text-slate-900 text-sm">EduBridge AI</span>
         </Link>
       </div>
 
-      <div className="hidden md:flex items-center space-x-2 text-xs text-slate-400">
-        <span className="flex items-center space-x-1.5 text-indigo-400 font-medium bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>EduBridge AI Learning Platform</span>
+      <div className="hidden md:flex items-center space-x-2 text-xs">
+        <span className="flex items-center space-x-1.5 text-indigo-700 font-semibold bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200">
+          <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+          <span>EduBridge Academic Platform</span>
         </span>
       </div>
 
@@ -31,23 +30,23 @@ export const Navbar: React.FC = () => {
         {user ? (
           <>
             <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-xs font-bold text-white shadow-md">
+              <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-sm">
                 {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-xs font-semibold text-white leading-tight">{user.name}</p>
-                <p className="text-[10px] text-indigo-400 capitalize">{user.role}</p>
+                <p className="text-xs font-bold text-slate-900 leading-tight">{user.name}</p>
+                <p className="text-[10px] text-indigo-600 font-semibold capitalize">{user.role}</p>
               </div>
             </div>
 
-            <div className="h-4 w-px bg-slate-800"></div>
+            <div className="h-4 w-px bg-slate-200"></div>
 
             <button
               onClick={logout}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-rose-500/20 hover:text-rose-300 text-slate-300 border border-slate-700 hover:border-rose-500/30 text-xs font-medium transition-all"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 border border-slate-200 text-xs font-medium transition-all"
               title="Sign Out"
             >
-              <LogOut className="w-3.5 h-3.5 text-rose-400" />
+              <LogOut className="w-3.5 h-3.5 text-rose-500" />
               <span className="hidden sm:inline">Logout</span>
             </button>
           </>
@@ -55,13 +54,13 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center space-x-3 text-xs font-semibold">
             <Link
               href="/login"
-              className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all"
+              className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition-all"
             >
               Sign In
             </Link>
             <Link
               href="/register"
-              className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-md transition-all"
+              className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all"
             >
               Register
             </Link>
@@ -71,4 +70,5 @@ export const Navbar: React.FC = () => {
     </header>
   );
 };
+
 

@@ -149,18 +149,18 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#090d16] flex items-center justify-center p-6 text-slate-100">
-      <div className="glass-card max-w-md w-full rounded-3xl p-8 border border-slate-800 space-y-6 shadow-2xl">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-slate-900">
+      <div className="glass-card max-w-md w-full rounded-3xl p-8 border border-slate-200 space-y-6 shadow-lg bg-white">
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/30">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center mx-auto shadow-md shadow-indigo-200">
             <Sparkles className="w-6 h-6 text-white" />
           </div>
-          <h2 className="text-2xl font-extrabold text-white">Create Your Account</h2>
-          <p className="text-xs text-slate-400">Join EduBridge AI platform as a Student or Educator</p>
+          <h2 className="text-2xl font-extrabold text-slate-900">Create Academic Account</h2>
+          <p className="text-xs text-slate-500">Join EduBridge AI platform as a Student or Educator</p>
         </div>
 
         {errorMsg && (
-          <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300 flex items-center space-x-2">
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center space-x-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMsg}</span>
           </div>
@@ -168,31 +168,31 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="font-semibold text-slate-300 mb-1 block">Full Name:</label>
+            <label className="font-semibold text-slate-700 mb-1 block">Full Name:</label>
             <div className="relative">
-              <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
                 placeholder="e.g. Ananya Sharma"
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3.5 py-2.5 text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white"
               />
             </div>
           </div>
 
           <div>
-            <label className="font-semibold text-slate-300 mb-1 block">Email Address:</label>
+            <label className="font-semibold text-slate-700 mb-1 block">Email Address:</label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="e.g. ananya@edubridge.ai"
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3.5 py-2.5 text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white"
               />
             </div>
           </div>
